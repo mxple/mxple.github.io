@@ -41,10 +41,10 @@ function enterKey(e) {
   // if CTRL + C, cancel
   // if CTRL + L, clear screen
   else if (e.which == 76 && e.ctrlKey == true) {
-    terminal.innerText = '<a id="before"></a>';
-    before = document.getElementById("before");
-    command.innerText = "";
-    cursorIndex = 0;
+    setTimeout(function() {
+      terminal.innerHTML = '<a id="before"></a>';
+      before = document.getElementById("before");
+    }, 1);
   }
   // if [UP] and history is not empty, repeat previous command
   else if (e.which == 38 && hist.length != 0) {

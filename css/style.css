@@ -1,0 +1,133 @@
+:root {
+  /* color pallete */
+  --col-1: #282a36; /*background*/
+  --col-2: #ff79c6; /*cmd-prompt*/
+  --col-3: #8be9fd; /*output-text*/
+  --col-4: #44475a; /*highlight*/
+  --col-5: #bd93f9; /*typing-text*/
+  --col-6: #ff5555; /*error*/
+  --col-7: #ffb86c; /*accent*/
+}
+
+body {
+  margin: 0;
+  padding: 15px 20px;
+  min-height: 99%;
+  /* width: 100%; */
+  /* min-width: 550px; */
+  color: var(--col-2);
+  background: var(--col-1);
+  font-family: 'Source Code Pro', monospace;
+  overflow-x: hidden;
+}
+::selection {
+  color: var(--col-1);
+  background-color: var(--col-4);
+}
+::-moz-selection {
+  color: var(--col-1);
+  background-color: var(--col-4);
+}
+textarea {
+  left: -1000px;
+  position: absolute;
+}
+
+/* Cursor Start */
+.cursor {
+  font-size: 12px;
+  color: var(--col-5);
+  background-color: var(--col-5);
+  position: relative;
+  opacity: 1;
+  height: 1.5em;
+  width: 9.64px;
+  max-width: 9.64px;
+  transform: translateY(3.5px);
+  overflow: hidden;
+  text-indent: -5px;
+  display: inline-block;
+  text-decoration: blink;
+  animation: blinker 1s steps(2, start) infinite;
+}
+@keyframes blinker {
+  to {
+    visibility: hidden;
+  }
+}
+#command {
+  cursor: text;
+  height: 50px;
+  color: var(--col-5);
+}
+#liner {
+  line-height: 1.3em;
+  margin-top: -2px;
+  opacity: 0;
+  animation: show 1s ease forwards;
+  /* animation-delay: 1.2s; */
+}
+#cmdprompt {
+  color: var(--col-2);
+}
+@keyframes show {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+/* Cursor End */
+p {
+  display: block;
+  line-height: 1.3em;
+  margin: 0;
+  overflow: hidden;
+  /* white-space: pre;  */
+}
+ul {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+li {
+  list-style-type: none;
+}
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
+}
+/* .index {
+  color: #DCDCCC;
+}
+.color2 {
+  color: #B89076;
+} */
+.command {
+  color: var(--col-5);
+  text-shadow: 0 0 5px var(--col-5); 
+}
+.error {
+  color: var(--col-6);
+}
+.white {
+  color: #fff;
+}
+.normal,
+a {
+  color: var(--col-3);
+}
+a {
+  text-decoration: inherit;
+}
+a:hover {
+  background: var(--col-5);
+  color: var(--col-1);
+}
+a:focus {
+  outline: 0;
+}

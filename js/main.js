@@ -1,0 +1,129 @@
+var before = document.getElementById("before");
+var cmdprompt = document.getElementById("cmdprompt");
+var cursor = document.getElementById("cursor");
+var command = document.getElementById("textbox");  
+var terminal = document.getElementById("terminal");
+
+var hist = [];
+var histIndex = 0;
+var cursorIndex = 0;
+var disableInput = false;
+
+var user = "guest";
+var pwd = "/usr/guest"
+
+const commandList = ["man","cd","pwd","ls","echo","cat","neofetch","clear","mkdir","rm","rmdir","cp","mv","touch","vim","sudo","reboot"];
+
+window.addEventListener("keydown", enterKey);
+
+// init
+cmdprompt.innerText = "guest@rinOS:~$ ";
+
+// handle input
+function enterKey(e) {
+  console.log(e);
+  // if [ENTER] key, add command to history and try to execute
+  if (e.which == 13) {
+    if (command.innerText.trim() != "") {
+      histIndex = hist.push(command.innerText);
+    }
+    addLine(cmdprompt.innerText + command.innerText, "no-animation", 0);
+    readLine(command.innerText.toLowerCase());
+    // reset things
+    command.innerText = "";
+    cursorIndex = 0;
+  }
+  // if [BACKSPACE] and not at beginning, delete previous character
+  else if (e.which == 8 && cursorIndex > 0) {
+    command.innerText = command.innerText.slice(0, cursorIndex-1)+command.innerText.slice(cursorIndex);
+    cursorIndex = Math.max(cursorIndex-1, 0);
+  }
+  // if CTRL + C, cancel
+  // if CTRL + L, clear screen
+  else if (e.which == 76 && e.ctrlKey == true) {
+    terminal.innerText = '<a id="before"></a>';
+    before = document.getElementById("before");
+    command.innerText = "";
+    cursorIndex = 0;
+  }
+  // if [UP] and history is not empty, repeat previous command
+  else if (e.which == 38 && hist.length != 0) {
+    histIndex = Math.max(histIndex-1, 0);
+    command.innerText = hist[histIndex];
+    cursorIndex = command.innerText.length
+  }
+  // if [DOWN] and histIndex is not at the bottom, go down a command
+  else if (e.which == 40 && histIndex != hist.length) {
+    histIndex += 1;
+    if (hist[histIndex] === undefined) {
+      command.innerText = "";
+    } else {
+      command.innerText = hist[histIndex];
+    }
+    cursorIndex = command.innerText.length
+  }
+  // if [LEFT], move cursor left
+  else if (e.which == 37) {
+    cursorIndex = Math.max(cursorIndex - 1,0);
+  }
+  // if [RIGHT], move cursor right
+  else if (e.which == 39) {
+    cursorIndex = Math.min(cursorIndex + 1, command.innerText.length);
+  }
+  // get rid of non-printables
+  else if (
+        (e.which > 47 && e.which < 62)   || // number keys
+        (e.which == 32 || e.which == 13) || // spacebar & return key(s) (if you want to allow carriage returns)
+        (e.which > 64 && e.which < 91)   || // letter keys
+        (e.which > 95 && e.which < 112)  || // numpad keys
+        (e.which == 173)                 || // - sign
+        (e.which > 185 && e.which < 193) || // ;=,-./` (in order)
+        (e.which > 218 && e.which < 223)    // [\]' (in order)
+  ) {
+    command.innerText = command.innerText.slice(0,cursorIndex)+ e.key + command.innerText.slice(cursorIndex);
+    console.log(command.innerText);
+    cursorIndex += 1;
+  }
+  // move cursor
+  cursor.style.left = -9.61*(command.innerText.length-cursorIndex) + "px";
+}
+
+function readLine(line) {
+  var cmd = line.split(" ")[0].toLowerCase();
+  var param = "";
+  var indexOfSpace = line.indexOf(" ");
+  if (indexOfSpace != -1) {
+    param = line.substring(indexOfSpace+1);
+  } 
+  if (cmd.trim() == "") {
+  } else if (commandList.includes(cmd)) {
+    // console.log(cmd+"("+param+")");
+    eval(cmd+"(\'"+param+"\')");
+  } else {
+    addLine("<span class=\"error\">Command not found. For a list of commands, type <span class=\"command\">'man'</span>.</span>", "error", 20);
+  }
+}
+
+function addLine(text, style, delay) {
+  setTimeout(function() {
+    var next = document.createElement("p");
+    next.innerHTML = DOMPurify.sanitize(text);
+    next.className = style;
+
+    before.parentNode.insertBefore(next, before);
+
+    window.scrollTo(0, document.body.offsetHeight);
+  }, delay);
+}
+
+function updateCmdPrompt() {
+  var end = "$ ";
+  var location = pwd;
+  if (user == "root") {
+    end = "# ";
+  }
+  else if (pwd.slice(5) == user) {
+    location = "~";
+  }
+  cmdprompt.innerText = user + "@rinOS:" + location + end;
+}

@@ -23,9 +23,12 @@ function getObject(path) {
     if (path.length == 1 && path[0] == "") {
         return directory;
     }
-    path.forEach((item)=>{
+    for (var item of path) {
         directory = directory[item];
-    })
+        if (directory == undefined) {
+            return undefined;
+        }
+    }
     return directory;
 }
 

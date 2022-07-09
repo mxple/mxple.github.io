@@ -40,10 +40,24 @@ function man(p) {
 function mkdir(p) {
     p = p.trim();
     if (p == "") {
-        addLine("Usage: touch [directory]","error");
+        addLine("Usage: mkdir [directory]","error");
         return;
     }
-
+    let path = parsePath(p);
+    if (isValidPath(path)) {
+        addLine("Error: \'"+p+"\' is already a directory","error");
+        return;
+    }
+    let directoriesToMake = [];
+    while (!isValidPath(path)) {
+        directoriesToMake.push(path.pop());
+    }
+    console.log(directoriesToMake)
+    for (var dname of directoriesToMake.reverse()) {
+        console.log(dname)
+        getObject(path)[dname] = {};
+        path.push(dname);
+    }
 }
 
 function getList(arr, style) {

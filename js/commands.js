@@ -1,10 +1,10 @@
 
 function man(p) {
     if (p != "") {
-        addLine("Error: Invalid parameter: \'"+p+"\'","error",0);
+        addLine("Error: Invalid parameter: \'"+p+"\'","error");
         return;
     }
-    addLine("A list of available commands:<ul>"+getList(commandList.sort(),"command")+"</ul>","normal",0);
+    addLine("A list of available commands:<ul>"+getList(commandList.sort(),"command")+"</ul>","normal");
 }
 
 function getList(arr, style) {
@@ -18,8 +18,17 @@ function getList(arr, style) {
     return(output);
 }
 
+// prints user input to stdout, cannot use addLine() due to HTML conversion
 function echo(p) {
-    addLine(p, "normal");
+    var next = document.createElement("p");
+    next.innerText = p;
+    next.className = "normal";
+
+    before.parentNode.insertBefore(next, before);
+
+    if (window.screen.width > 780) {
+        window.scrollTo(0, document.body.offsetHeight);
+    }
 }
 
 function clear(p) {
@@ -32,7 +41,6 @@ function clear(p) {
 function reboot(p) {
     location.reload();
 }
-
 
 ////////////////////////
 // neofetch eye candy //

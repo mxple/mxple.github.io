@@ -116,6 +116,7 @@ function cd(p) {
         currentDir = [...parsePath(p)];
     }
     updateCmdPrompt();
+    updateTitle();
 }
 
 function updateCmdPrompt() {

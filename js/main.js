@@ -125,3 +125,7 @@ function addLine(text, style, delay) {
     window.scrollTo(0, document.body.offsetHeight);
   }
 }
+
+function updateTitle() {
+  document.title=unparsePath(currentDir);
+}

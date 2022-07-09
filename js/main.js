@@ -26,7 +26,7 @@ function enterKey(e) {
     if (command.innerText.trim() != "") {
       histIndex = hist.push(command.innerText);
     }
-    addLine(cmdprompt.innerText + command.innerText, "no-animation", 0);
+    addLine(cmdprompt.innerText + command.innerText);
     readLine(command.innerText.toLowerCase());
     // reset things
     command.innerText = "";
@@ -100,20 +100,18 @@ function readLine(line) {
     console.log(cmd+"("+param+")");
     eval(cmd+"(\'"+param+"\')");
   } else {
-    addLine("<span class=\"error\">Command not found. For a list of commands, type <span class=\"command\">'man'</span>.</span>", "error", 20);
+    addLine("<span class=\"error\">Command not found. For a list of commands, type <span class=\"command\">'man'</span>.</span>", "error", 0);
   }
 }
 
 function addLine(text, style, delay) {
-  setTimeout(function() {
-    var next = document.createElement("p");
-    next.innerHTML = DOMPurify.sanitize(text);
-    next.className = style;
+  var next = document.createElement("p");
+  next.innerHTML = DOMPurify.sanitize(text);
+  next.className = style;
 
-    before.parentNode.insertBefore(next, before);
+  before.parentNode.insertBefore(next, before);
 
-    if (window.screen.width > 780) {
-      window.scrollTo(0, document.body.offsetHeight);
-    }
-  }, delay);
+  if (window.screen.width > 780) {
+    window.scrollTo(0, document.body.offsetHeight);
+  }
 }

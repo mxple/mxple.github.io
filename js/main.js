@@ -10,7 +10,6 @@ var cursorIndex = 0;
 var disableInput = false;
 
 var user = "guest";
-var pwd = "/usr/guest"
 
 const commandList = ["man","cd","pwd","ls","echo","cat","neofetch","clear","mkdir","rm","rmdir","cp","mv","touch","vim","sudo","reboot"];
 
@@ -112,16 +111,4 @@ function addLine(text, style, delay) {
 
     window.scrollTo(0, document.body.offsetHeight);
   }, delay);
-}
-
-function updateCmdPrompt() {
-  var end = "$ ";
-  var location = pwd;
-  if (user == "root") {
-    end = "# ";
-  }
-  else if (pwd.slice(5) == user) {
-    location = "~";
-  }
-  cmdprompt.innerText = user + "@rinOS:" + location + end;
 }

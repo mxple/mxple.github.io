@@ -18,8 +18,30 @@ function getList(arr, style) {
     return(output);
 }
 
+// creates a file
+function touch(p) {
+    p = p.trim();
+    if (p == "") {
+        addLine("Error: Too few arguments, expected 1, got 0","error");
+        return;
+    }
+    let path = parsePath(p);
+    let fname = path.pop();
+    getObject(path)[fname] = "";
+}
+
 // prints user input to stdout, cannot use addLine() due to HTML conversion
 function echo(p) {
+    // echo to other output
+    let i = p.indexOf(">");
+    if (i > -1) {
+        console.log("YEABITCH")
+        let path = parsePath(p.slice(i+2));
+        let fname = path.pop().trim();
+        getObject(path)[fname] = p.slice(0,i);
+        return;
+    }
+    // stdout
     var next = document.createElement("p");
     next.innerText = p;
     next.className = "normal";

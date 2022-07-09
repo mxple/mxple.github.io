@@ -21,7 +21,6 @@ cmdprompt.innerText = "guest@rinOS:~$ ";
 
 // handle input
 function enterKey(e) {
-  console.log(e);
   // if [ENTER] key, add command to history and try to execute
   if (e.which == 13) {
     if (command.innerText.trim() != "") {
@@ -81,7 +80,6 @@ function enterKey(e) {
         (e.which > 218 && e.which < 223)    // [\]' (in order)
   ) {
     command.innerText = command.innerText.slice(0,cursorIndex)+ e.key + command.innerText.slice(cursorIndex);
-    console.log(command.innerText);
     cursorIndex += 1;
   }
   // move cursor
@@ -97,7 +95,7 @@ function readLine(line) {
   } 
   if (cmd.trim() == "") {
   } else if (commandList.includes(cmd)) {
-    // console.log(cmd+"("+param+")");
+    console.log(cmd+"("+param+")");
     eval(cmd+"(\'"+param+"\')");
   } else {
     addLine("<span class=\"error\">Command not found. For a list of commands, type <span class=\"command\">'man'</span>.</span>", "error", 20);

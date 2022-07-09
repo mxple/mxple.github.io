@@ -1,14 +1,21 @@
 
 function man(p) {
     if (p != "") {
-        addLine("<span class=\"error\">Error: Invalid parameter: \'"+p+"\'</span>","normal",0);
+        addLine("Error: Invalid parameter: \'"+p+"\'","error",0);
+        return;
     }
-    var output = "<span class=\"normal\">A list of available commands:<ul></ul></span>"
-    commandList.sort().forEach((item)=>{
-        let tempString = "<li class=\"command\">"+item+"</li>";
-        output = output.slice(0,-12)+tempString+output.slice(-12);
-    })
-    addLine("<span class=\"normal\">"+output+"</span>","normal",0);
+    addLine("A list of available commands:<ul>"+getList(commandList.sort(),"command")+"</ul>","normal",0);
+}
+
+function getList(arr, style) {
+    if (typeof style == "string") {
+        style = new Array(arr.length).fill(style);
+    }
+    var output = "";
+    for (let i=0; i<arr.length; i++) {
+        output += "<li class=\""+style[i]+"\">"+arr[i]+"</li>";
+    }
+    return(output);
 }
 
 function echo(p) {
@@ -27,15 +34,15 @@ function reboot(p) {
 }
 
 // TEMP COMMANDS
-const files = ["about.txt","hello_world.txt","train.txt"];
-function ls(p) {
-    var output = "<span class=\"normal\"><ul></ul></span>";
-    files.sort().forEach((item)=>{
-        let tempString = "<li class=\"normal\">"+item+"</li>";
-        output = output.slice(0,-12)+tempString+output.slice(-12);
-    })
-    addLine(output,"normal",0);
-}
+// const files = ["about.txt","hello_world.txt","train.txt"];
+// function ls(p) {
+//     var output = "<span class=\"normal\"><ul></ul></span>";
+//     files.sort().forEach((item)=>{
+//         let tempString = "<li class=\"normal\">"+item+"</li>";
+//         output = output.slice(0,-12)+tempString+output.slice(-12);
+//     })
+//     addLine(output,"normal",0);
+// }
 
 function cat(p) {
     if (files.includes(p)) {
@@ -49,7 +56,6 @@ function cat(p) {
             addLine("Shut up ☝️☝️☝️, both of you! Now do you get 🉐🉐🉐 it? I don't know 🤔 where 🤷 the train 🚋 goes BECAUSE of this ⬆️! Is 🈶 this ⬆️ person 👤👤👤 good 👌👍🏾? Is 🈶 that person 👤 bad 📉? There's no 😣😣😣 way ↕️↕️ to tell 🗣️ which way ↕️↕️ the train 🚋🚋 goes if you keep on 🔛 fighting 🥊 with each other! I’ve been here 👈👈, and I’ve seen enough of other people 👫 go through exactly what 😅 you’re doing but still no 😣 one 1️⃣ figures out 🏎️🏍️ where 🤷 the train 🚋🚋🚋 goes. How 🤔 can they get 🉐🉐 on 🔛 without knowing 🤔?", "normal", 0);
         }
     } else if (p.trim() == "") {
-        console.log("bithc");
         addLine("Error: Too few arguments, expected 1, have 0","error",0);
     } else {
         addLine("Error: No such file or directory: "+"\'"+p+"\'","error",0);
@@ -57,3 +63,4 @@ function cat(p) {
 }
 
 // END TEMP COMMANDS
+

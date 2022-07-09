@@ -37,6 +37,15 @@ function man(p) {
     addLine("A list of available commands:<ul>"+getList(commandList.sort(),"command")+"</ul>","normal");
 }
 
+function mkdir(p) {
+    p = p.trim();
+    if (p == "") {
+        addLine("Usage: touch [directory]","error");
+        return;
+    }
+
+}
+
 function getList(arr, style) {
     if (typeof style == "string") {
         style = new Array(arr.length).fill(style);
@@ -57,6 +66,11 @@ function touch(p) {
     }
     let path = parsePath(p);
     let fname = path.pop();
+    // check if valid
+    if (!isValidPath(path)) {
+        addLine("Error: No such directory: "+"\'"+unparsePath(path)+"\'","error");
+        return;
+    }
     getObject(path)[fname] = "";
 }
 

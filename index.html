@@ -3,19 +3,19 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable = no"/>
     <title>Terminal</title>
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap" rel="stylesheet">
     <link rel="stylesheet" type="text/css" media="screen" href="css/style.css" />
     <!-- <link rel="icon" type="image/x-icon" href="img/fav-icon.png" /> -->
   </head>
-  <body>
+  <body ontouchstart="document.getElementById('hiddeninput').focus()">
     <div id="terminal">
       <a id="before"></a>
     </div>
     <div id="command">
       <div id="liner">
-        <span id="cmdprompt"></span><span id="textbox" style="white-space: break-spaces"></span><b class="cursor" id="cursor" style="position:relative">█</b>
+        <input id="hiddeninput"></input><span id="cmdprompt"></span><span id="textbox" style="white-space: break-spaces"></span><b class="cursor" id="cursor" style="position:relative">█</b>
       </div>
     </div>
     <script src="js/main.js"></script>

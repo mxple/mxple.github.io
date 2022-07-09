@@ -131,3 +131,8 @@ a:hover {
 a:focus {
   outline: 0;
 }
+#hiddeninput {
+  /* display: none; */
+  opacity: 0;
+  position: absolute;
+}

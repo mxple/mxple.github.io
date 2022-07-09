@@ -3,6 +3,7 @@ var cmdprompt = document.getElementById("cmdprompt");
 var cursor = document.getElementById("cursor");
 var command = document.getElementById("textbox");  
 var terminal = document.getElementById("terminal");
+var textbox = document.getElementById("hiddeninput");
 
 var hist = [];
 var histIndex = 0;
@@ -83,6 +84,8 @@ function enterKey(e) {
   }
   // move cursor
   cursor.style.left = -9.61*(command.innerText.length-cursorIndex) + "px";
+  // clear textbox (mobile only)
+  textbox.innerText = "";
 }
 
 function readLine(line) {

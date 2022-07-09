@@ -5,9 +5,16 @@ function cp(p) {
         addLine("Usage: cp [source_file] [target_file]","error");
         return;
     }
-    console.log(tuple);
     if (!isValidPath(parsePath(tuple[0]))) {
         addLine("Error: No such file or directory: "+"\'"+unparsePath(parsePath(tuple[0]))+"\'","error");
+        return;
+    }
+    if (typeof getObject(parsePath(tuple[0])) == "object") {
+        addLine("Error: \'"+unparsePath(parsePath(tuple[0]))+"\' is a directory","error");
+        return;
+    }
+    if (typeof getObject(tuple[0]) == "object") {
+        addLine("Error: \'"+unparsePath(path)+"\' is a directory","error");
         return;
     }
     if (tuple[0] == tuple[1]) {
@@ -18,13 +25,14 @@ function cp(p) {
         addLine("Error: No such directory: "+"\'"+unparsePath(parsePath(tuple[1]).pop())+"\'","error");
         return;
     }
-    if (isValidPath(parsePath(tuple[1]))) {
-        let path = parsePath(tuple[1]);
+    let path = parsePath(tuple[1]);
+    // no rename
+    if (isValidPath(path)) {
         let fname = tuple[0];
         getObject(path)[fname] = getObject(parsePath(tuple[0])).toString();        
         return;
     }
-    let path = parsePath(tuple[1]);
+    // yes rename
     let fname = path.pop();
     getObject(path)[fname] = getObject(parsePath(tuple[0])).toString();
 }
@@ -52,12 +60,50 @@ function mkdir(p) {
     while (!isValidPath(path)) {
         directoriesToMake.push(path.pop());
     }
-    console.log(directoriesToMake)
     for (var dname of directoriesToMake.reverse()) {
-        console.log(dname)
         getObject(path)[dname] = {};
         path.push(dname);
     }
+}
+
+function mv(p) {
+    let tuple = p.trim().split(" ");
+    if (tuple.length != 2) {
+        addLine("Usage: mv [source_file] [target_location].","error");
+        return;
+    }
+    if (!isValidPath(parsePath(tuple[0]))) {
+        addLine("Error: No such file or directory: "+"\'"+unparsePath(parsePath(tuple[0]))+"\'.","error");
+        return;
+    }
+    if (typeof getObject(parsePath(tuple[0])) == "object") {
+        addLine("Error: \'"+unparsePath(parsePath(tuple[0]))+"\' is a directory","error");
+        return;
+    }
+    if (tuple[0] == tuple[1]) {
+        addLine("Error: \'"+tuple[0]+"\' and \'"+tuple[1]+"\' are identical (not moved).","error");
+        return;
+    }
+    if (!isValidPath(parsePath(tuple[1]).slice(0,-1))) {
+        addLine("Error: No such directory: "+"\'"+unparsePath(parsePath(tuple[1]).pop())+"\'.","error");
+        return;
+    }
+    let path = parsePath(tuple[1]);
+    // renaming and moving over
+    if (isValidPath(path)) {
+        let fname = tuple[0];
+        console.log(path)
+        getObject(path)[fname] = getObject(parsePath(tuple[0])).toString();        
+    } 
+    // just moving over
+    else {
+        let fname = path.pop();
+        getObject(path)[fname] = getObject(parsePath(tuple[0])).toString();
+    }
+    // deleting here
+    let tempPath = parsePath(tuple[0]);
+    let fname = tempPath.pop();
+    delete getObject(tempPath)[fname];
 }
 
 function getList(arr, style) {

@@ -21,6 +21,9 @@ cmdprompt.innerText = "guest@rinOS:~$ ";
 
 // handle input
 function enterKey(e) {
+  if (disableInput) {
+    return;
+  }
   // if [ENTER] key, add command to history and try to execute
   if (e.which == 13) {
     if (command.innerText.trim() != "") {

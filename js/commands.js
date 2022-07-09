@@ -22,7 +22,7 @@ function getList(arr, style) {
 function touch(p) {
     p = p.trim();
     if (p == "") {
-        addLine("Error: Too few arguments, expected 1, got 0","error");
+        addLine("Usage: touch [file]","error");
         return;
     }
     let path = parsePath(p);
@@ -53,6 +53,7 @@ function echo(p) {
     }
 }
 
+// clears the terminal element
 function clear(p) {
     setTimeout(function() {
         terminal.innerHTML = '<a id="before"></a>';
@@ -103,3 +104,45 @@ addLine("\
   `._.-._.'     <b>memory</b> "+(10000+Math.floor(Math.random()*22000))+" / 32768M<br>\
 ","rainbow");
 }
+
+function rm(p) {
+    p = p.trim();
+    if (p == "") {
+        addLine("Usage: rm [-r | -f] [path]","error");
+        return;
+    } else if (p.slice(0,3) == "-rf") {
+        // if (user != "root") {
+        //     addLine("Permission denied.","error");
+        //     return;
+        // }
+        // GLITCH!!
+        disableInput = true;
+        cursor.style.animation = "none";
+        var gl = Object.create(glitch_exec);
+        gl.GLITCH_RENDER_COUNT = 5;
+        gl.start(document.body);
+        setTimeout(function() {
+            document.getElementById("body").innerHTML = "";
+        }, 5000);
+        return; 
+    }
+    let path = parsePath(p);
+    if (!isValidPath(path)) {
+        addLine("Error: No such file or directory: "+"\'"+unparsePath(path)+"\'","error");
+        return;
+    }
+    let fname = path.pop();
+    delete getObject(path)[fname];
+
+}
+
+// vim is a meme
+function vim(p) {
+    addLine("Don't open vim, you wouldn't be able to :qa!", "error");
+}
+
+
+
+
+
+// helper funcs

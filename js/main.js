@@ -30,7 +30,7 @@ function enterKey(e) {
       histIndex = hist.push(command.innerText);
     }
     addLine(cmdprompt.innerText + command.innerText);
-    readLine(command.innerText.toLowerCase());
+    readLine(command.innerText);
     // reset things
     command.innerText = "";
     cursorIndex = 0;
@@ -100,13 +100,12 @@ function enterKey(e) {
 }
 
 function readLine(line) {
-  var cmd = line.split(" ")[0].toLowerCase();
-  var param = "";
-  var indexOfSpace = line.indexOf(" ");
-  if (indexOfSpace != -1) {
-    param = line.substring(indexOfSpace+1);
-  } 
+  line = line.split(" ");
+  var cmd = line[0].toLowerCase();
+  line.shift()
+  var param = line.join(" ");
   if (cmd.trim() == "") {
+    return;
   } else if (commandList.includes(cmd)) {
     console.log(cmd+"("+param+")");
     eval(cmd+"(\'"+param+"\')");

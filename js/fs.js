@@ -63,7 +63,7 @@ function unparsePath(p) {
 // takes array and turns it into string location
 function pwd(p) {
     if (p != "") {
-        addLine("Error: Invalid parameter: \'"+p+"\'","error",0);
+        addLine("Error: Too many arguments, expected 0, got 1","error");
         return;
     }
     addLine("/"+currentDir.join("/"), "normal");

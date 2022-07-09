@@ -133,7 +133,7 @@ function updateCmdPrompt() {
 function cat(p) {
     p = p.trim();
     if (p == "") {
-        addLine("Error: Too few arguments, expected 1, got 0","error");
+        addLine("Usage: cat [filename]","error");
         return;
     }
     var path = parsePath(p);

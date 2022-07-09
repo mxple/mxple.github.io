@@ -189,9 +189,36 @@ function rm(p) {
         addLine("Error: No such file or directory: "+"\'"+unparsePath(path)+"\'","error");
         return;
     }
+    if (typeof getObject(path) == "object") {
+        addLine("Error: \'"+unparsePath(path)+"\' is a directory","error");
+        return;
+    }
     let fname = path.pop();
     delete getObject(path)[fname];
+}
 
+function rmdir(p) {
+    p = p.trim();
+    if (p == "") {
+        addLine("Usage: rmdir [-r | -f] [path]","error");
+        return;
+    }
+    let path = parsePath(p);
+    if (!isValidPath(path)) {
+        addLine("Error: No such file or directory: "+"\'"+unparsePath(path)+"\'","error");
+        return;
+    }
+    if (typeof getObject(path) == "string") {
+        addLine("Error: \'"+unparsePath(path)+"\' is not a directory","error");
+        return;
+    }
+    if (path.length<=1) {
+        console.log(path)
+        addLine("Permission denied.","error");
+        return;
+    }
+    let fname = path.pop();
+    delete getObject(path)[fname];
 }
 
 // vim is a meme

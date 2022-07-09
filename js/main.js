@@ -112,6 +112,8 @@ function addLine(text, style, delay) {
 
     before.parentNode.insertBefore(next, before);
 
-    window.scrollTo(0, document.body.offsetHeight);
+    if (window.screen.width > 780) {
+      window.scrollTo(0, document.body.offsetHeight);
+    }
   }, delay);
 }

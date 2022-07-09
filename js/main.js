@@ -37,6 +37,10 @@ function enterKey(e) {
     command.innerText = command.innerText.slice(0, cursorIndex-1)+command.innerText.slice(cursorIndex);
     cursorIndex = Math.max(cursorIndex-1, 0);
   }
+  // prevent [TAB] behavior
+  else if (e.which == 9) {
+    e.preventDefault();
+  }
   // if CTRL + C, cancel
   // if CTRL + L, clear screen
   else if (e.which == 76 && e.ctrlKey == true) {
@@ -79,6 +83,10 @@ function enterKey(e) {
         (e.which > 185 && e.which < 193) || // ;=,-./` (in order)
         (e.which > 218 && e.which < 223)    // [\]' (in order)
   ) {
+    // prevent quickfind
+    if(e.which == 222 || e.which == 191) {
+      e.preventDefault();
+    }
     command.innerText = command.innerText.slice(0,cursorIndex)+ e.key + command.innerText.slice(cursorIndex);
     cursorIndex += 1;
   }

@@ -55,6 +55,15 @@ function parsePath(p) {
             tempPath = ["home",user];
         }
     }
+    // remove excess blanks
+    var i = 0;
+    while (i < p.length) {
+        if (p[i] == "") {
+            p.splice(i, 1);
+        } else {
+            i++;
+        }
+    }
     tempPath.push(...p);
     return tempPath;
 }
@@ -84,7 +93,7 @@ function ls(p) {
         if (isValidPath(parsePath(p))) {
             folder = getObject(parsePath(p));
         } else {
-            addLine("Error: No such file or directory: "+"\'"+p+"\'","error",0);
+            addLine("Error: No such file or directory: "+"\'"+unparsePath(parsePath(p))+"\'","error",0);
             return;
         }
     }

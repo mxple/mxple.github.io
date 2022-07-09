@@ -1,4 +1,34 @@
 
+function cp(p) {
+    let tuple = p.trim().split(" ");
+    if (tuple.length != 2) {
+        addLine("Usage: cp [source_file] [target_file]","error");
+        return;
+    }
+    console.log(tuple);
+    if (!isValidPath(parsePath(tuple[0]))) {
+        addLine("Error: No such file or directory: "+"\'"+unparsePath(parsePath(tuple[0]))+"\'","error");
+        return;
+    }
+    if (tuple[0] == tuple[1]) {
+        addLine("Error: \'"+tuple[0]+"\' and \'"+tuple[1]+"\' are identical (not copied).","error");
+        return;
+    }
+    if (!isValidPath(parsePath(tuple[1]).slice(0,-1))) {
+        addLine("Error: No such directory: "+"\'"+unparsePath(parsePath(tuple[1]).pop())+"\'","error");
+        return;
+    }
+    if (isValidPath(parsePath(tuple[1]))) {
+        let path = parsePath(tuple[1]);
+        let fname = tuple[0];
+        getObject(path)[fname] = getObject(parsePath(tuple[0])).toString();        
+        return;
+    }
+    let path = parsePath(tuple[1]);
+    let fname = path.pop();
+    getObject(path)[fname] = getObject(parsePath(tuple[0])).toString();
+}
+
 function man(p) {
     if (p != "") {
         addLine("Error: Invalid parameter: \'"+p+"\'","error");
@@ -35,7 +65,6 @@ function echo(p) {
     // echo to other output
     let i = p.indexOf(">");
     if (i > -1) {
-        console.log("YEABITCH")
         let path = parsePath(p.slice(i+2));
         let fname = path.pop().trim();
         getObject(path)[fname] = p.slice(0,i);
@@ -123,7 +152,8 @@ function rm(p) {
         gl.start(document.body);
         setTimeout(function() {
             document.getElementById("body").innerHTML = "";
-        }, 5000);
+            document.getElementById("body").style.backgroundColor = "black";
+        }, 6000);
         return; 
     }
     let path = parsePath(p);

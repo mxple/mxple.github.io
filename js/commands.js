@@ -214,10 +214,10 @@ function rm(p) {
         addLine("Usage: rm [-r | -f] [path]","error");
         return;
     } else if (p.slice(0,3) == "-rf") {
-        // if (user != "root") {
-        //     addLine("Permission denied.","error");
-        //     return;
-        // }
+        if (user != "root") {
+            addLine("Permission denied.","error");
+            return;
+        }
         // GLITCH!!
         disableInput = true;
         cursor.style.animation = "none";
@@ -268,6 +268,25 @@ function rmdir(p) {
     }
     let fname = path.pop();
     delete getObject(path)[fname];
+}
+
+function sudo(p) {
+    p = p.split(" ");
+    var cmd = p[0].toLowerCase();
+    p.shift();
+    var param = p.join(" ");
+    if (cmd.trim() == "") {
+        return;
+    } else if (commandList.includes(cmd)) {
+        // req password
+
+        let tempUser = user;
+        user = "root";
+        eval(cmd+"(\'"+param+"\')");
+        user = tempUser;
+    } else {
+        addLine("<span class=\"error\">Command not found. For a list of commands, type <span class=\"command\">'man'</span>.</span>", "error", 0);
+    }
 }
 
 // vim is a meme

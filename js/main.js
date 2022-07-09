@@ -8,9 +8,13 @@ var textbox = document.getElementById("hiddeninput");
 var hist = [];
 var histIndex = 0;
 var cursorIndex = 0;
+var enteringPassword = false;
 var disableInput = false;
 
 var user = "guest";
+var pass = "";
+var secret = "strawbry";
+var sudoCommand = "";
 
 const commandList = ["man","cd","pwd","ls","echo","cat","neofetch","clear","mkdir","rm","rmdir","cp","mv","touch","vim","sudo","reboot"];
 
@@ -30,6 +34,31 @@ function enterKey(e) {
       histIndex = hist.push(command.innerText);
     }
     addLine(cmdprompt.innerText + command.innerText);
+    // password mode
+    if (enteringPassword) {
+      if (pass == secret) {
+        readLine(sudoCommand);
+      } else {
+        addLine("Incorrect password, permission denied.","error")
+      }
+      // resetting
+      updateCmdPrompt();
+      sudoCommand = "";
+      enteringPassword = false;
+      pass = "";
+      command.innerText = "";
+      cursorIndex = 0;
+      return;
+    }
+    // sudo behavior
+    if (command.innerText.toLowerCase().slice(0,4) == "sudo") {
+      cmdprompt.innerText = "Password: ";
+      enteringPassword = true;
+      sudoCommand = command.innerText;
+      command.innerText = "";
+      cursorIndex = 0;
+      return;
+    }
     readLine(command.innerText);
     // reset things
     command.innerText = "";
@@ -37,29 +66,34 @@ function enterKey(e) {
   }
   // if [BACKSPACE] and not at beginning, delete previous character
   else if (e.which == 8 && cursorIndex > 0) {
-    command.innerText = command.innerText.slice(0, cursorIndex-1)+command.innerText.slice(cursorIndex);
-    cursorIndex = Math.max(cursorIndex-1, 0);
+    if (!enteringPassword) {
+      command.innerText = command.innerText.slice(0, cursorIndex-1)+command.innerText.slice(cursorIndex);
+      cursorIndex = Math.max(cursorIndex-1, 0);    
+    } else {
+      pass = pass.slice(0, cursorIndex-1)+pass.slice(cursorIndex);
+      cursorIndex = Math.max(cursorIndex-1, 0);    
+    }
   }
   // prevent [TAB] behavior
-  else if (e.which == 9) {
+  else if (e.which == 9 && !enteringPassword) {
     e.preventDefault();
   }
   // if CTRL + C, cancel
   // if CTRL + L, clear screen
-  else if (e.which == 76 && e.ctrlKey == true) {
+  else if (e.which == 76 && e.ctrlKey == true && !enteringPassword) {
     setTimeout(function() {
       terminal.innerHTML = '<a id="before"></a>';
       before = document.getElementById("before");
     }, 1);
   }
   // if [UP] and history is not empty, repeat previous command
-  else if (e.which == 38 && hist.length != 0) {
+  else if (e.which == 38 && hist.length != 0 && !enteringPassword) {
     histIndex = Math.max(histIndex-1, 0);
     command.innerText = hist[histIndex];
     cursorIndex = command.innerText.length
   }
   // if [DOWN] and histIndex is not at the bottom, go down a command
-  else if (e.which == 40 && histIndex != hist.length) {
+  else if (e.which == 40 && histIndex != hist.length && !enteringPassword) {
     histIndex += 1;
     if (hist[histIndex] === undefined) {
       command.innerText = "";
@@ -90,11 +124,17 @@ function enterKey(e) {
     if(e.which == 222 || e.which == 191) {
       e.preventDefault();
     }
-    command.innerText = command.innerText.slice(0,cursorIndex)+ e.key + command.innerText.slice(cursorIndex);
+    if (!enteringPassword) {
+      command.innerText = command.innerText.slice(0,cursorIndex)+ e.key + command.innerText.slice(cursorIndex);
+    } else {
+      pass = pass.slice(0,cursorIndex)+ e.key + pass.slice(cursorIndex);
+    }
     cursorIndex += 1;
   }
   // move cursor
-  cursor.style.left = -9.61*(command.innerText.length-cursorIndex) + "px";
+  if (!enteringPassword) {
+    cursor.style.left = -9.61*(command.innerText.length-cursorIndex) + "px";
+  }
   // clear textbox (mobile only)
   textbox.innerText = "";
 }
@@ -107,7 +147,6 @@ function readLine(line) {
   if (cmd.trim() == "") {
     return;
   } else if (commandList.includes(cmd)) {
-    console.log(cmd+"("+param+")");
     eval(cmd+"(\'"+param+"\')");
   } else {
     addLine("<span class=\"error\">Command not found. For a list of commands, type <span class=\"command\">'man'</span>.</span>", "error", 0);

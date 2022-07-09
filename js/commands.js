@@ -181,6 +181,9 @@ function rm(p) {
         setTimeout(function() {
             document.getElementById("body").innerHTML = "";
             document.getElementById("body").style.backgroundColor = "black";
+            document.getElementById("body").style.padding = "100%";
+            document.getElementById("body").style.cursor = "none";
+            document.addEventListener('contextmenu', event => event.preventDefault());        
         }, 6000);
         return; 
     }

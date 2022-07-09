@@ -117,7 +117,7 @@ function readLine(line) {
 
 function addLine(text, style, delay) {
   var next = document.createElement("p");
-  next.innerHTML = DOMPurify.sanitize(text);
+  next.innerHTML = text;
   next.className = style;
 
   before.parentNode.insertBefore(next, before);

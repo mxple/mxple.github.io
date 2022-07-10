@@ -75,7 +75,7 @@ function unparsePath(p) {
 // takes array and turns it into string location
 function pwd(p) {
     if (p != "") {
-        addLine("Error: Too many arguments, expected 0, got 1","error");
+        addLine("Error: Too many arguments, expected 0, got 1.","error");
         return;
     }
     addLine("/"+currentDir.join("/"), "normal");
@@ -91,16 +91,20 @@ function ls(p) {
     var folder = getObject(currentDir);
     if (p != "") {
         if (isValidPath(parsePath(p))) {
+            if (typeof getObject(parsePath(p)) == "string") {
+                addLine("Error: \'"+unparsePath(parsePath(p))+"\' is not a directory.","error",0);
+                return;
+            }
             folder = getObject(parsePath(p));
         } else {
-            addLine("Error: No such file or directory: "+"\'"+unparsePath(parsePath(p))+"\'","error",0);
+            addLine("Error: No such file or directory: "+"\'"+unparsePath(parsePath(p))+"\'.","error",0);
             return;
         }
     }
     var keys = [];
     for (var key in folder) {
         if (folder.hasOwnProperty(key)) {
-          keys.push(key);
+            keys.push(key);
         }
     }
     addLine("<ul>"+getList(keys, "normal")+"</ul>");
@@ -111,7 +115,7 @@ function cd(p) {
     if (p == "..") {
         currentDir.pop();
     } else if (!isValidPath(parsePath(p))) {
-        addLine("Error: No such file or directory: "+"\'"+p+"\'","error",0);
+        addLine("Error: No such file or directory: "+"\'"+p+"\'.","error",0);
     } else {
         currentDir = [...parsePath(p)];
     }

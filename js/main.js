@@ -29,7 +29,7 @@ window.onload = init;
 
 window.addEventListener("keydown", enterKey);
 
-// handle input
+// handles input
 function enterKey(e) {
 	if (disableInput) {
 		return;
@@ -150,6 +150,8 @@ function enterKey(e) {
 	textbox.innerText = "";
 }
 
+// processes the line and evaluates the command if there is one
+// TODO: check for security risks using eval function
 function readLine(line) {
 	line = line.split(" ");
 	var cmd = line[0].toLowerCase();
@@ -164,6 +166,7 @@ function readLine(line) {
 	}
 }
 
+// adds a new line above the textbox element
 function addLine(text, style) {
 	var next = document.createElement("p");
 	next.innerHTML = text;
@@ -176,6 +179,7 @@ function addLine(text, style) {
 	}
 }
 
+// updates the command prompt based on user and current directory
 function updateCmdPrompt() {
 	var end = "$ ";
 	var location = "/" + currentDir.join("/");
@@ -188,10 +192,21 @@ function updateCmdPrompt() {
 	cmdprompt.innerText = user + "@rinOS:" + location + end;
 }
 
+// updates the site title to match the output of "pwd"
 function updateTitle() {
 	document.title = unparsePath(currentDir);
 }
 
+// updates the commandList variable to match with the /bin folder
+function updateCommandList() {
+	let bin = getObject(["bin"]);
+	if (bin == undefined) {
+		return;
+	}
+	commandList = Object.keys(bin);
+}
+
+// locks user input and simulates typewriter effect with input
 function autoType(input) {
 	disableInput = true;
 	var delay = 80; // delay in ms between chars
@@ -208,6 +223,7 @@ function autoType(input) {
 	}, delay);
 }
 
+// returns a list of elements to be used in certain commands
 function getList(arr, style) {
 	if (typeof style == "string") {
 		style = new Array(arr.length).fill(style);
@@ -217,12 +233,4 @@ function getList(arr, style) {
 		output += "<li class=\"" + style[i] + "\">" + arr[i] + "</li>";
 	}
 	return (output);
-}
-
-function updateCommandList() {
-	let bin = getObject(["bin"]);
-	if (bin == undefined) {
-		return;
-	}
-	commandList = Object.keys(bin);
 }

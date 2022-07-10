@@ -1,33 +1,33 @@
 // JSON file system object emulating standard UNIX filesystem
 var FS = {
     "bin": {
-        "cat"       : "Outputs file contents",
-        "cd"        : "Change directories",
-        "clear"     : "Clear the terminal",
-        "cp"        : "Copy files from one location to another",
-        "echo"      : "Takes text and outputs it either to the terminal or to a file",
-        "ls"        : "Lists items in current or specified directory",
-        "man"       : "Short for manual, shows available commands",
-        "mkdir"     : "Makes a new directory",
-        "mv"        : "Moves files from one location to another",
-        "neofetch"  : "Eyecandy and r/unixporn essential",
-        "pwd"       : "Where am I?",
-        "reboot"    : "Reboots this site",
-        "rm"        : "Removes the specified file... among other things",
-        "rmdir"     : "Removes the specified directory",
-        "sudo"      : "I got the powahhh!!",
-        "touch"     : "Creates a file",
-        "vim"       : "Remember, :qa!"
+        "cat": "Outputs file contents",
+        "cd": "Change directories",
+        "clear": "Clear the terminal",
+        "cp": "Copy files from one location to another",
+        "echo": "Takes text and outputs it either to the terminal or to a file",
+        "ls": "Lists items in current or specified directory",
+        "man": "Short for manual, shows available commands",
+        "mkdir": "Makes a new directory",
+        "mv": "Moves files from one location to another",
+        "neofetch": "Eyecandy and r/unixporn essential",
+        "pwd": "Where am I?",
+        "reboot": "Reboots this site",
+        "rm": "Removes the specified file... among other things",
+        "rmdir": "Removes the specified directory",
+        "sudo": "I got the powahhh!!",
+        "touch": "Creates a file",
+        "vim": "Remember, :qa!"
 
     },
     "dev": {},
     "etc": {
-        "logfile_07032005.txt" : "<span class=''>[2005-03-7|12:34:35]</span> Ohno, I'm prone to losing my passwords.. Good thing I'm smart enough to leave my password in a file somewhere... <span class='error'>NOT in plaintext.</span> -signed, your system admin"
+        "logfile_07032005.txt": "<span class=''>[2005-03-7|12:34:35]</span> Ohno, I'm prone to losing my passwords.. Good thing I'm smart enough to leave my password in a file somewhere... <span class='error'>NOT in plaintext.</span> -signed, your system admin"
     },
     "home": {
         "guest": {
-            "banner.txt": 
-"<span style='white-space:pre'><span class='banner rainbow' style='font-size:12px;line-height:1.2;display:block'><br>\
+            "banner.txt":
+                "<span style='white-space:pre'><span class='banner rainbow' style='font-size:12px;line-height:1.2;display:block'><br>\
 ███╗   ███╗██╗  ██╗██████╗ ██╗    ███████╗██████╗ ██╗███╗   ██╗<br>\
 ████╗ ████║╚██╗██╔╝██╔══██╗██║    ██╔════╝██╔══██╗██║████╗  ██║<br>\
 ██╔████╔██║ ╚███╔╝ ██████╔╝██║    █████╗  ██████╔╝██║██╔██╗ ██║<br>\
@@ -50,7 +50,7 @@ Made with <span style='color:var(--col-6)'>♥ </span>by <a href='https://github
 }
 
 // initial directory
-var currentDir = ["home","guest"];
+var currentDir = ["home", "guest"];
 
 // return reference to object in path, return undefined if the path is invalid
 function getObject(path) {
@@ -73,7 +73,7 @@ function parsePath(p) {
     var tempPath = [...currentDir];
     p = p.split("/");
     // gets rid of extra "/" at end
-    if (p[p.length-1] == "") {
+    if (p[p.length - 1] == "") {
         p.pop()
     }
     // if starts with "/", use root
@@ -87,7 +87,7 @@ function parsePath(p) {
         if (user == "root") {
             tempPath = ["root"];
         } else {
-            tempPath = ["home",user];
+            tempPath = ["home", user];
         }
     }
     // remove excess blanks
@@ -105,10 +105,10 @@ function parsePath(p) {
 
 // takes a path array and returns a path string ex. ["home","guest"] --> "/home/guest"
 function unparsePath(p) {
-    return ("/"+p.join("/"));
+    return ("/" + p.join("/"));
 }
 
 // takes array and returns boolean if array is a valid path
 function isValidPath(p) {
-    return(getObject(p) != undefined);
+    return (getObject(p) != undefined);
 }

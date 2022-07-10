@@ -1,12 +1,19 @@
 :root {
   /* color pallete */
-  --col-1: #282a36; /*background*/
-  --col-2: #ff79c6; /*cmd-prompt*/
-  --col-3: #8be9fd; /*output-text*/
-  --col-4: #bd93f9; /*highlight*/
-  --col-5: #bd93f9; /*typing-text*/
-  --col-6: #ff5555; /*error*/
-  --col-7: #ffb86c; /*accent*/
+  --col-1: #282a36;
+  /*background*/
+  --col-2: #ff79c6;
+  /*cmd-prompt*/
+  --col-3: #8be9fd;
+  /*output-text*/
+  --col-4: #bd93f9;
+  /*highlight*/
+  --col-5: #bd93f9;
+  /*typing-text*/
+  --col-6: #ff5555;
+  /*error*/
+  --col-7: #ffb86c;
+  /*accent*/
   --col-8: #50fa7b;
   --col-9: #f1fa8c;
 }
@@ -22,14 +29,17 @@ body {
   font-family: 'Source Code Pro', monospace;
   overflow-x: hidden;
 }
+
 ::selection {
   color: var(--col-1);
   background-color: var(--col-4);
 }
+
 ::-moz-selection {
   color: var(--col-1);
   background-color: var(--col-4);
 }
+
 textarea {
   left: -1000px;
   position: absolute;
@@ -52,16 +62,19 @@ textarea {
   text-decoration: blink;
   animation: blinker 1s steps(2, start) infinite;
 }
+
 @keyframes blinker {
   to {
     visibility: hidden;
   }
 }
+
 #command {
   cursor: text;
   height: 50px;
   color: var(--col-5);
 }
+
 #liner {
   line-height: 1.3em;
   margin-top: -2px;
@@ -69,17 +82,21 @@ textarea {
   animation: show 1s ease forwards;
   /* animation-delay: 1.2s; */
 }
+
 #cmdprompt {
   color: var(--col-2);
 }
+
 @keyframes show {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
 }
+
 /* Cursor End */
 p {
   display: block;
@@ -88,22 +105,27 @@ p {
   overflow: hidden;
   white-space: break-spaces;
 }
+
 ul {
   justify-items: left;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
+
 li {
   list-style-type: none;
 }
+
 @keyframes typing {
   from {
     width: 0;
   }
+
   to {
     width: 100%;
   }
 }
+
 /* .index {
   color: #DCDCCC;
 }
@@ -111,42 +133,49 @@ li {
   color: #B89076;
 } */
 .banner {
-  text-shadow: 0 0 6px var(--col-4); 
+  text-shadow: 0 0 6px var(--col-4);
 }
 
 .command {
   color: var(--col-8);
-  text-shadow: 0 0 4px var(--col-8); 
+  text-shadow: 0 0 4px var(--col-8);
 }
+
 .error {
   color: var(--col-6);
 }
+
 .white {
   color: #fff;
 }
+
 .normal {
   color: var(--col-3);
 }
+
 .folder {
   color: var(--col-9);
 }
+
 .rainbow {
-  background: linear-gradient(120deg, rgba(255,0,0,1) 0%, rgba(255,154,0,1) 10%, rgba(208,222,33,1) 20%, rgba(79,220,74,1) 30%, rgba(63,218,216,1) 40%, rgba(47,201,226,1) 50%, rgba(28,127,238,1) 60%, rgba(95,21,242,1) 70%, rgba(186,12,248,1) 80%, rgba(251,7,217,1) 90%, rgba(255,0,0,1) 100%);  
+  background: linear-gradient(120deg, rgba(255, 0, 0, 1) 0%, rgba(255, 154, 0, 1) 10%, rgba(208, 222, 33, 1) 20%, rgba(79, 220, 74, 1) 30%, rgba(63, 218, 216, 1) 40%, rgba(47, 201, 226, 1) 50%, rgba(28, 127, 238, 1) 60%, rgba(95, 21, 242, 1) 70%, rgba(186, 12, 248, 1) 80%, rgba(251, 7, 217, 1) 90%, rgba(255, 0, 0, 1) 100%);
   background-size: 100%;
   background-clip: text;
   -webkit-background-clip: text;
   -moz-background-clip: text;
-  -webkit-text-fill-color: transparent; 
+  -webkit-text-fill-color: transparent;
   -moz-text-fill-color: transparent;
 }
 
 .typing-animation {
   animation: typing 0.5s steps(30, end);
 }
+
 @keyframes typing {
   from {
     width: 0;
   }
+
   to {
     width: 100%;
   }
@@ -156,13 +185,16 @@ a {
   color: var(--col-7);
   text-decoration: inherit;
 }
+
 a:hover {
   background: var(--col-5);
   color: var(--col-1);
 }
+
 a:focus {
   outline: 0;
 }
+
 #hiddeninput {
   /* display: none; */
   opacity: 0;

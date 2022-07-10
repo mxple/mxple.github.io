@@ -2,17 +2,17 @@
 function cat(p) {
     p = p.trim();
     if (p == "") {
-        addLine("Usage: cat [filename]","error");
+        addLine("Usage: cat [filename]", "error");
         return;
     }
     const path = parsePath(p);
     const object = getObject(parsePath(p));
     switch (typeof object) {
         case "object":
-            addLine("Error: '"+unparsePath(path)+"' is a directory.","error");
+            addLine("Error: '" + unparsePath(path) + "' is a directory.", "error");
             break;
         case "undefined":
-            addLine("Error: No such file or directory: '"+unparsePath(path)+"'.","error");
+            addLine("Error: No such file or directory: '" + unparsePath(path) + "'.", "error");
             break;
         case "string":
             addLine(object, "normal")
@@ -26,7 +26,7 @@ function cd(p) {
     if (p == "..") {
         currentDir.pop();
     } else if (!isValidPath(parsePath(p))) {
-        addLine("Error: No such file or directory: '"+p+"'.","error",0);
+        addLine("Error: No such file or directory: '" + p + "'.", "error", 0);
     } else {
         currentDir = [...parsePath(p)];
     }
@@ -36,7 +36,7 @@ function cd(p) {
 
 // clears the terminal element
 function clear() {
-    setTimeout(function() {
+    setTimeout(function () {
         terminal.innerHTML = '<a id="before"></a>';
         before = document.getElementById("before");
     }, 1);
@@ -49,36 +49,36 @@ function cp(p) {
     let tuple = p.trim().split(" ");
     // catch invalid commands and throw errors
     if (tuple.length != 2) {
-        addLine("Usage: cp [source_file] [target_file]","error");
+        addLine("Usage: cp [source_file] [target_file]", "error");
         return;
     }
-    let tuplePaths = [parsePath(tuple[0]),parsePath(tuple[1])];
+    let tuplePaths = [parsePath(tuple[0]), parsePath(tuple[1])];
     if (tuple[0] == tuple[1]) {
-        addLine("Error: '"+tuple[0]+"' and '"+tuple[1]+"' are identical (not copied).","error");
+        addLine("Error: '" + tuple[0] + "' and '" + tuple[1] + "' are identical (not copied).", "error");
         return;
     }
     if (!isValidPath(tuplePaths[0])) {
-        addLine("Error: No such file or directory: '"+unparsePath(tuplePaths[0])+"'.","error");
+        addLine("Error: No such file or directory: '" + unparsePath(tuplePaths[0]) + "'.", "error");
         return;
     }
     if (typeof getObject(tuplePaths[0]) == "object") {
-        addLine("Error: '"+unparsePath(tuplePaths[0])+"' is a directory.","error");
+        addLine("Error: '" + unparsePath(tuplePaths[0]) + "' is a directory.", "error");
         return;
     }
-    if (!isValidPath(tuplePaths[1].slice(0,-1))) {
-        addLine("Error: No such directory: '"+unparsePath(tuplePaths[1].slice(0,-1))+"/'.","error");
+    if (!isValidPath(tuplePaths[1].slice(0, -1))) {
+        addLine("Error: No such directory: '" + unparsePath(tuplePaths[1].slice(0, -1)) + "/'.", "error");
         return;
     }
     // if the destination is a directory
     if (tuple[1].slice(-1) == "/" && typeof getObject(tuplePaths[1]) != "object") {
         // if the directory does not exist
-        addLine("Error: No such directory: '"+unparsePath(tuplePaths[1])+"/'.","error");
+        addLine("Error: No such directory: '" + unparsePath(tuplePaths[1]) + "/'.", "error");
         return;
     }
     // no rename
     if (isValidPath(tuplePaths[1])) {
         let fname = tuple[0];
-        getObject(tuplePaths[1])[fname] = getObject(tuplePaths[0]).toString();        
+        getObject(tuplePaths[1])[fname] = getObject(tuplePaths[0]).toString();
         return;
     }
     // yes rename
@@ -92,14 +92,14 @@ function echo(p) {
     let i = p.indexOf(">");
     if (i > -1) {
         // TODO: account for white space variability
-        let path = parsePath(p.slice(i+2));
+        let path = parsePath(p.slice(i + 2));
         let fname = path.pop().trim();
         if (!isValidPath(path)) {
-            addLine("Error: No such directory: '"+unparsePath(path)+"'.","error");
+            addLine("Error: No such directory: '" + unparsePath(path) + "'.", "error");
             return;
         }
         // create or redeclare key-value pair
-        getObject(path)[fname] = p.slice(0,i);
+        getObject(path)[fname] = p.slice(0, i);
         return;
     }
     // stdout
@@ -121,11 +121,11 @@ function ls(p) {
     let path = parsePath(p);
     if (p != "") {
         if (!isValidPath(path)) {
-            addLine("Error: No such file or directory: '"+unparsePath(path)+"'.","error",0);
+            addLine("Error: No such file or directory: '" + unparsePath(path) + "'.", "error", 0);
             return;
         }
         if (typeof getObject(path) == "string") {
-            addLine("Error: '"+unparsePath(path)+"' is not a directory.","error",0);
+            addLine("Error: '" + unparsePath(path) + "' is not a directory.", "error", 0);
             return;
         }
         folder = getObject(path);
@@ -143,32 +143,32 @@ function ls(p) {
             }
         }
     }
-    addLine("<ul>"+getList(keys, styles)+"</ul>");
+    addLine("<ul>" + getList(keys, styles) + "</ul>");
 }
 
 // pulls up manual which changes based on contents of /bin
 function man(p) {
     if (commandList.includes(p.toLowerCase())) {
-        addLine(getObject(["bin",p.toLowerCase()]),"normal");
+        addLine(getObject(["bin", p.toLowerCase()]), "normal");
         return;
     }
     if (p != "") {
-        addLine("Error: Not a command: '"+p+"'.","error");
+        addLine("Error: Not a command: '" + p + "'.", "error");
         return;
     }
-    addLine("A list of available commands:<ul>"+getList(commandList.sort(),"command")+"</ul>","normal");
+    addLine("A list of available commands:<ul>" + getList(commandList.sort(), "command") + "</ul>", "normal");
 }
 
 // creates an object paired to the specified key; can make multiple at once
 function mkdir(p) {
     p = p.trim();
     if (p == "") {
-        addLine("Usage: mkdir [directory]","error");
+        addLine("Usage: mkdir [directory]", "error");
         return;
     }
     let path = parsePath(p);
     if (isValidPath(path)) {
-        addLine("Error: '"+p+" is already a directory.","error");
+        addLine("Error: '" + p + " is already a directory.", "error");
         return;
     }
     let directoriesToMake = [];
@@ -185,37 +185,37 @@ function mkdir(p) {
 function mv(p) {
     let tuple = p.trim().split(" ");
     if (tuple.length != 2) {
-        addLine("Usage: mv [source_file] [target_location].","error");
+        addLine("Usage: mv [source_file] [target_location].", "error");
         return;
     }
-    let tuplePaths = [parsePath(tuple[0]),parsePath(tuple[1])];
+    let tuplePaths = [parsePath(tuple[0]), parsePath(tuple[1])];
     if (!isValidPath(tuplePaths[0])) {
-        addLine("Error: No such file or directory: '"+unparsePath(tuplePaths[0])+"'.","error");
+        addLine("Error: No such file or directory: '" + unparsePath(tuplePaths[0]) + "'.", "error");
         return;
     }
     if (typeof getObject(tuplePaths[0]) == "object") {
-        addLine("Error: '"+unparsePath(tuplePaths[0])+"' is a directory.","error");
+        addLine("Error: '" + unparsePath(tuplePaths[0]) + "' is a directory.", "error");
         return;
     }
     if (tuple[0] == tuple[1]) {
-        addLine("Error: '"+tuple[0]+"' and '"+tuple[1]+"' are identical (not moved).","error");
+        addLine("Error: '" + tuple[0] + "' and '" + tuple[1] + "' are identical (not moved).", "error");
         return;
     }
-    if (!isValidPath(tuplePaths[1].slice(0,-1))) {
-        addLine("Error: No such directory: '"+unparsePath(tuplePaths[1].slice(0,-1))+"/'.","error");
+    if (!isValidPath(tuplePaths[1].slice(0, -1))) {
+        addLine("Error: No such directory: '" + unparsePath(tuplePaths[1].slice(0, -1)) + "/'.", "error");
         return;
     }
     // if the destination is a directory
     if (tuple[1].slice(-1) == "/" && typeof getObject(tuplePaths[1]) != "object") {
         // if the directory does not exist
-        addLine("Error: No such directory: '"+unparsePath(tuplePaths[1])+"/'.","error");
+        addLine("Error: No such directory: '" + unparsePath(tuplePaths[1]) + "/'.", "error");
         return;
     }
     // renaming and moving over
     if (isValidPath(tuplePaths[1])) {
         let fname = tuple[0];
-        getObject(tuplePaths[1])[fname] = getObject(tuplePaths[0]).toString();        
-    } 
+        getObject(tuplePaths[1])[fname] = getObject(tuplePaths[0]).toString();
+    }
     // just moving over
     else {
         let fname = tuplePaths[1].pop();
@@ -245,33 +245,33 @@ function neofetch(p) {
     // gets time spent on site using performance.now() and returns it in
     // a "_h _m _s" format
     var getElapsedTime = (function () {
-        let s = Math.floor(performance.now()/1000);
-        let hrs = Math.floor(s/3600);
+        let s = Math.floor(performance.now() / 1000);
+        let hrs = Math.floor(s / 3600);
         s %= 3600;
-        let mins = Math.floor(s/60);
+        let mins = Math.floor(s / 60);
         s %= 60;
-        return (hrs+"h "+mins+"m "+s+"s");
+        return (hrs + "h " + mins + "m " + s + "s");
     });
     // this is actually pfetch lol
     addLine("</span style='white-space:nowrap'>\
-       .:'      "+user+"@rinOS<br>\
+       .:'      "+ user + "@rinOS<br>\
     _ :'_       <b>os</b>     rinOS<br>\
- .'`_`-'_``.    <b>host</b>   "+browserName+"<br>\
+ .'`_`-'_``.    <b>host</b>   "+ browserName + "<br>\
 :________.-'    <b>kernel</b> 4.2.0<br>\
-:_______:       <b>uptime</b> "+getElapsedTime()+"<br>\
- :_______`-;    <b>pkgs</b>   "+Object.keys(FS.bin).length+"<br>\
-  `._.-._.'     <b>memory</b> "+(10000+Math.floor(Math.random()*22000))+" / 32768M<br>\
+:_______:       <b>uptime</b> "+ getElapsedTime() + "<br>\
+ :_______`-;    <b>pkgs</b>   "+ Object.keys(FS.bin).length + "<br>\
+  `._.-._.'     <b>memory</b> "+ (10000 + Math.floor(Math.random() * 22000)) + " / 32768M<br>\
 </span>\
-","rainbow");
+", "rainbow");
 }
 
 // takes array and outputs the string location
 function pwd(p) {
     if (p != "") {
-        addLine("Error: Too many arguments, expected 0, got 1.","error");
+        addLine("Error: Too many arguments, expected 0, got 1.", "error");
         return;
     }
-    addLine("/"+currentDir.join("/"), "normal");
+    addLine("/" + currentDir.join("/"), "normal");
 }
 
 // reloads page
@@ -284,14 +284,14 @@ function touch(p) {
     p = p.trim();
     // if input is empty or is a directory
     if (p == "" || p.slice(-1) == "/") {
-        addLine("Usage: touch [file]","error");
+        addLine("Usage: touch [file]", "error");
         return;
     }
     let path = parsePath(p);
     let fname = path.pop();
     // check if valid
     if (!isValidPath(path)) {
-        addLine("Error: No such directory: '"+unparsePath(path)+"/'.","error");
+        addLine("Error: No such directory: '" + unparsePath(path) + "/'.", "error");
         return;
     }
     getObject(path)[fname] = "";
@@ -301,11 +301,11 @@ function touch(p) {
 function rm(p) {
     p = p.trim();
     if (p == "") {
-        addLine("Usage: rm [-r | -f] [file]","error");
+        addLine("Usage: rm [-r | -f] [file]", "error");
         return;
     } else if (p == "-rf") {
         if (user != "root") {
-            addLine("Permission denied.","error");
+            addLine("Permission denied.", "error");
             return;
         }
         // GLITCH effect: disables input, starts glitch, makes page unusable after delay
@@ -314,22 +314,22 @@ function rm(p) {
         var gl = Object.create(glitch_exec);
         gl.GLITCH_RENDER_COUNT = 5;
         gl.start(document.body);
-        setTimeout(function() {
+        setTimeout(function () {
             document.getElementById("body").innerHTML = "";
             document.getElementById("body").style.backgroundColor = "black";
             document.getElementById("body").style.padding = "100%";
             document.getElementById("body").style.cursor = "none";
-            document.addEventListener('contextmenu', event => event.preventDefault());        
+            document.addEventListener('contextmenu', event => event.preventDefault());
         }, 6000);
-        return; 
+        return;
     }
     let path = parsePath(p);
     if (!isValidPath(path)) {
-        addLine("Error: No such file or directory: '"+unparsePath(path)+"'.","error");
+        addLine("Error: No such file or directory: '" + unparsePath(path) + "'.", "error");
         return;
     }
     if (typeof getObject(path) == "object" || p.slice(-1) == "/") {
-        addLine("Error: '"+unparsePath(path)+"' is a directory.","error");
+        addLine("Error: '" + unparsePath(path) + "' is a directory.", "error");
         return;
     }
     let fname = path.pop();
@@ -342,21 +342,21 @@ function rm(p) {
 function rmdir(p) {
     p = p.trim();
     if (p == "") {
-        addLine("Usage: rmdir [-r | -f] [path]","error");
+        addLine("Usage: rmdir [-r | -f] [path]", "error");
         return;
     }
     let path = parsePath(p);
     if (!isValidPath(path)) {
-        addLine("Error: No such file or directory: '"+unparsePath(path)+"'.","error");
+        addLine("Error: No such file or directory: '" + unparsePath(path) + "'.", "error");
         return;
     }
     if (typeof getObject(path) == "string") {
-        addLine("Error: '"+unparsePath(path)+"' is not a directory.","error");
+        addLine("Error: '" + unparsePath(path) + "' is not a directory.", "error");
         return;
     }
-    if (path.length<=1) {
+    if (path.length <= 1) {
         console.log(path)
-        addLine("Permission denied.","error");
+        addLine("Permission denied.", "error");
         return;
     }
     let fname = path.pop();
@@ -374,7 +374,7 @@ function sudo(p) {
     } else if (commandList.includes(cmd)) {
         let tempUser = user;
         user = "root";
-        eval(cmd+"(\'"+param+"\')");
+        eval(cmd + "(\'" + param + "\')");
         user = tempUser;
     } else {
         addLine("<span class='error'>Command not found. For a list of commands, type <span class='command'>'man'</span>.</span>", "error", 0);

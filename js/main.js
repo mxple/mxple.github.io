@@ -22,6 +22,7 @@ window.addEventListener("keydown", enterKey);
 
 // init
 cmdprompt.innerText = "guest@rinOS:~$ ";
+init();
 
 // handle input
 function enterKey(e) {
@@ -167,4 +168,25 @@ function addLine(text, style, delay) {
 
 function updateTitle() {
   document.title=unparsePath(currentDir);
+}
+
+function autoType(input) {
+  disableInput = true;
+  var delay = 50; // delay in ms between chars
+  input = input.split("");
+  var autoTyper = setInterval(function() {
+    command.innerText += input.shift();
+  }, delay);
+
+  setTimeout(function() {
+    clearInterval(autoTyper);
+    addLine(cmdprompt.innerText + command.innerText);
+    readLine(command.innerText);
+    command.innerText = "";
+    disableInput = false;
+  }, input.length*delay+delay)
+}
+
+function init() {
+  autoType("neofetch");
 }

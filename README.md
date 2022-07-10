@@ -15,5 +15,7 @@ html2canvas library is from [Niklas von Hertzen](https://github.com/niklasvh/htm
 Initial code foundation from [Forrest Knight](https://github.com/ForrestKnight)
 
 ## Password
-The password for the `sudo` command:
->! strawberry
+<details> 
+  <summary>Q1: The password for the `sudo` command: </summary>
+   A1: Strawberry 
+</details>

@@ -13,7 +13,7 @@ var disableInput = false;
 
 var user = "guest";
 var pass = "";
-var secret = "strawbry";
+var secret = "strawberry";
 var sudoCommand = "";
 
 const commandList = ["man","cd","pwd","ls","echo","cat","neofetch","clear","mkdir","rm","rmdir","cp","mv","touch","vim","sudo","reboot"];
@@ -172,19 +172,18 @@ function updateTitle() {
 
 function autoType(input) {
   disableInput = true;
-  var delay = 50; // delay in ms between chars
+  var delay = 80; // delay in ms between chars
   input = input.split("");
   var autoTyper = setInterval(function() {
     command.innerText += input.shift();
+    if (input.length < 1) {
+      clearInterval(autoTyper);
+      addLine(cmdprompt.innerText + command.innerText);
+      readLine(command.innerText);
+      command.innerText = "";
+      disableInput = false;
+    }
   }, delay);
-
-  setTimeout(function() {
-    clearInterval(autoTyper);
-    addLine(cmdprompt.innerText + command.innerText);
-    readLine(command.innerText);
-    command.innerText = "";
-    disableInput = false;
-  }, input.length*delay+delay)
 }
 
 function init() {

@@ -197,7 +197,7 @@ function getElapsedTime() {
 }
 
 function neofetch(p) {
-addLine("\
+addLine("</span style=\'white-space:nowrap\'>\
        .:'      "+user+"@rinOS<br>\
     _ :'_       <b>os</b>     rinOS<br>\
  .'`_`-'_``.    <b>host</b>   "+browserName+"<br>\
@@ -205,6 +205,7 @@ addLine("\
 :_______:       <b>uptime</b> "+getElapsedTime()+"<br>\
  :_______`-;    <b>pkgs</b>   "+Object.keys(FS.bin).length+"<br>\
   `._.-._.'     <b>memory</b> "+(10000+Math.floor(Math.random()*22000))+" / 32768M<br>\
+</span>\
 ","rainbow");
 }
 

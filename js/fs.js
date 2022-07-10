@@ -5,14 +5,31 @@ var FS = {
         "rm": "js code"
     },
     "dev": {},
-    "etc": {},
+    "etc": {
+        "logfile_07032005.txt" : "<span class=\'\'>[2005-03-7|12:34:35]</span> Ohno, I'm prone to losing my passwords.. Good thing I'm smart enough to leave my password in a file somewhere... <span class=\'error\'>NOT in plaintext.</span> -signed, your system admin"
+    },
     "home": {
         "guest": {
-            "foo.txt": "some string",
-            "bar.txt": "some other string"
+            "banner.txt": 
+"<span style=\'white-space:pre\'><span style=\'font-size:12px;line-height:1.2;display:block\'>\
+███╗   ███╗██╗  ██╗██████╗ ██╗    ███████╗██████╗ ██╗███╗   ██╗<br>\
+████╗ ████║╚██╗██╔╝██╔══██╗██║    ██╔════╝██╔══██╗██║████╗  ██║<br>\
+██╔████╔██║ ╚███╔╝ ██████╔╝██║    █████╗  ██████╔╝██║██╔██╗ ██║<br>\
+██║╚██╔╝██║ ██╔██╗ ██╔═══╝ ██║    ██╔══╝  ██╔══██╗██║██║╚██╗██║<br>\
+██║ ╚═╝ ██║██╔╝ ██╗██║     ██████╗███████╗██║  ██║██║██║ ╚████║<br>\
+╚═╝     ╚═╝╚═╝  ╚═╝╚═╝     ╚═════╝╚══════╝╚═╝  ╚═╝╚═╝╚═╝  ╚═══╝ v1.0.1</span>\
+<br>\
+Try <span class=\'command\'>'neofetch'</span> for eye candy!<br>\
+---<br>\
+Made with ♥ by <a href=\'https://github.com/mxple\'>RIN<\a><br>\
+</span>",
+            "about.txt": "This is an interactive terminal-styled website featuring common UNIX commands. Try typing <span class=\'command\'>'man'</span> to get started or use <span class=\'command\'>'cat'</span> to explore the files. Have fun finding all the easter eggs!",
+            "repo.txt": "Read more about this site or report issues at <a href=\'https://github.com/Mxple/mxple.github.io\'>https://github.com/Mxple/mxple.github.io<\a>"
         }
     },
-    "root": {},
+    "root": {
+        "hint.txt": "🍓"
+    },
     "usr": {}
 }
 // initial directory

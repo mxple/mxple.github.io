@@ -39,7 +39,7 @@ function enterKey(e) {
 		if (command.innerText.trim() != "") {
 			histIndex = hist.push(command.innerText);
 		}
-		addLine(cmdprompt.innerText + command.innerText);
+		addLine(cmdprompt.innerText.slice(0,-1)+"&nbsp" + command.innerText, "enteredCommand");
 		// password mode
 		if (enteringPassword) {
 			if (pass == secret) {
@@ -181,7 +181,7 @@ function addLine(text, style) {
 
 // updates the command prompt based on user and current directory
 function updateCmdPrompt() {
-	var end = "$ ";
+	var end = "$&nbsp";
 	var location = "/" + currentDir.join("/");
 	if (user == "root") {
 		end = "# ";
@@ -189,7 +189,7 @@ function updateCmdPrompt() {
 	if ((currentDir[0] == "home" && currentDir[1] == user && currentDir.length == 2) || (currentDir[0] == user && user == "root" && currentDir.length == 1)) {
 		location = "~";
 	}
-	cmdprompt.innerText = user + "@rinOS:" + location + end;
+	cmdprompt.innerHTML = user + "@rinOS:" + location + end;
 }
 
 // updates the site title to match the output of "pwd"

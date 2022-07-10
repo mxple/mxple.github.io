@@ -27,7 +27,7 @@ var FS = {
     "home": {
         "guest": {
             "banner.txt":
-                "<span style='white-space:pre'><span class='banner rainbow' style='font-size:12px;line-height:1.2;display:block'><br>\
+                "<span style='white-space:pre'><span class='banner rainbow'><br>\
 ███╗   ███╗██╗  ██╗██████╗ ██╗    ███████╗██████╗ ██╗███╗   ██╗<br>\
 ████╗ ████║╚██╗██╔╝██╔══██╗██║    ██╔════╝██╔══██╗██║████╗  ██║<br>\
 ██╔████╔██║ ╚███╔╝ ██████╔╝██║    █████╗  ██████╔╝██║██╔██╗ ██║<br>\
@@ -37,7 +37,7 @@ var FS = {
 <br>\
 Try <span class='command'>'neofetch'</span> for eye candy!<br>\
 ---<br>\
-Made with <span style='color:var(--col-6)'>♥ </span>by <a href='https://github.com/mxple'>RIN<\a><br> \
+Made with <span style='color:var(--col-6)'>♥</span> by <a href='https://github.com/mxple'>RIN</a><br> \
 </span>",
             "about.txt": "This is an interactive terminal-styled website featuring common UNIX commands. Try typing <span class='command'>'man'</span> to get started or use <span class='command'>'cat'</span> to explore the files. Have fun finding all the easter eggs!",
             "repo.txt": "Read more about this site or report issues at <a href'https://github.com/Mxple/mxple.github.io'>https://github.com/Mxple/mxple.github.io<\a>"

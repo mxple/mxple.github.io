@@ -16,6 +16,6 @@ Initial code foundation from [Forrest Knight](https://github.com/ForrestKnight)
 
 ## Password
 <details> 
-  <summary>Q1: The password for the `sudo` command: </summary>
-   A1: Strawberry 
+  <summary>The password for the `sudo` command: </summary>
+   Strawberry 
 </details>

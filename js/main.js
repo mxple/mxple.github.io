@@ -80,6 +80,11 @@ function enterKey(e) {
     e.preventDefault();
   }
   // if CTRL + C, cancel
+  else if (e.which == 67 && e.ctrlKey == true && !enteringPassword) {
+    addLine(cmdprompt.innerText + command.innerText);
+    command.innerText = "";
+    cursorIndex = 0;
+  }
   // if CTRL + L, clear screen
   else if (e.which == 76 && e.ctrlKey == true && !enteringPassword) {
     setTimeout(function() {

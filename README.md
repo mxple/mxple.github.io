@@ -1,11 +1,17 @@
 # mxple.github.io
-A UNIX-like web terminal featuring a virtual filesystem, common UNIX commands, and lots of eye candy - all powered by Javascript. Live website: https://mxple.github.io
+A UNIX-like web terminal featuring a virtual filesystem, common UNIX commands, and lots of eye candy - all powered by Javascript. Live website: **https://mxple.github.io**
 
 <img width="893" alt="image" src="https://user-images.githubusercontent.com/83033020/178164741-47708790-aacf-4e9d-bd00-eca22c5dc611.png">
 
 
 ## Configuring
-To build, simply clone the repository and use a host such as `http-server` to get started. All commands can be in `js/commands.js`. 
+To build, simply clone the repository and use a host such as `http-server` to get started:
+```zsh
+$ git clone https://github.com/Mxple/mxple.github.io
+$ cd mxple.github.io
+$ http-server
+```
+
 
 To add your own command, in addition to writing the JS function, you must add the command to the `/bin` folder in the `FS` vaariable found in `js/FS.js`.
 

@@ -16,7 +16,7 @@ var pass = "";
 var secret = "strawberry";
 var sudoCommand = "";
 
-const commandList = ["man","cd","pwd","ls","echo","cat","neofetch","clear","mkdir","rm","rmdir","cp","mv","touch","vim","sudo","reboot"];
+var commandList = ["man","cd","pwd","ls","echo","cat","neofetch","clear","mkdir","rm","rmdir","cp","mv","touch","vim","sudo","reboot"];
 
 window.addEventListener("keydown", enterKey);
 
@@ -187,5 +187,5 @@ function autoType(input) {
 }
 
 function init() {
-  autoType("neofetch");
+  autoType("cat banner.txt");
 }

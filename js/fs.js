@@ -1,8 +1,23 @@
 var FS = {
     "bin": {
-        "ls": "js code",
-        "cd": "js code",
-        "rm": "js code"
+        "cat"       : "Outputs file contents",
+        "cd"        : "Change directories",
+        "clear"     : "Clear the terminal",
+        "cp"        : "Copy files from one location to another",
+        "echo"      : "Takes text and outputs it either to the terminal or to a file",
+        "ls"        : "Lists items in current or specified directory",
+        "man"       : "Short for manual, shows available commands",
+        "mkdir"     : "Makes a new directory",
+        "mv"        : "Moves files from one location to another",
+        "neofetch"  : "Eyecandy and r/unixporn essential",
+        "pwd"       : "Where am I?",
+        "reboot"    : "Reboots this site",
+        "rm"        : "Removes the specified file... among other things",
+        "rmdir"     : "Removes the specified directory",
+        "sudo"      : "I got the powahhh!!",
+        "touch"     : "Creates a file",
+        "vim"       : "Remember, :qa!"
+
     },
     "dev": {},
     "etc": {
@@ -11,7 +26,7 @@ var FS = {
     "home": {
         "guest": {
             "banner.txt": 
-"<span style=\'white-space:pre\'><span style=\'font-size:12px;line-height:1.2;display:block\'>\
+"<span style=\'white-space:pre\'><span class=\'banner rainbow\' style=\'font-size:12px;line-height:1.2;display:block\'><br>\
 ███╗   ███╗██╗  ██╗██████╗ ██╗    ███████╗██████╗ ██╗███╗   ██╗<br>\
 ████╗ ████║╚██╗██╔╝██╔══██╗██║    ██╔════╝██╔══██╗██║████╗  ██║<br>\
 ██╔████╔██║ ╚███╔╝ ██████╔╝██║    █████╗  ██████╔╝██║██╔██╗ ██║<br>\
@@ -21,7 +36,7 @@ var FS = {
 <br>\
 Try <span class=\'command\'>'neofetch'</span> for eye candy!<br>\
 ---<br>\
-Made with ♥ by <a href=\'https://github.com/mxple\'>RIN<\a><br>\
+Made with <span style=\'color:var(--col-6)\'>♥ </span>by <a href=\'https://github.com/mxple\'>RIN<\a><br> \
 </span>",
             "about.txt": "This is an interactive terminal-styled website featuring common UNIX commands. Try typing <span class=\'command\'>'man'</span> to get started or use <span class=\'command\'>'cat'</span> to explore the files. Have fun finding all the easter eggs!",
             "repo.txt": "Read more about this site or report issues at <a href=\'https://github.com/Mxple/mxple.github.io\'>https://github.com/Mxple/mxple.github.io<\a>"
@@ -119,12 +134,19 @@ function ls(p) {
         }
     }
     var keys = [];
+    var styles = [];
     for (var key in folder) {
         if (folder.hasOwnProperty(key)) {
             keys.push(key);
+            if (typeof folder[key] == "object") {
+                styles.push("folder");
+            } else {
+                styles.push("normal");
+            }
         }
     }
-    addLine("<ul>"+getList(keys, "normal")+"</ul>");
+    console.log(styles)
+    addLine("<ul>"+getList(keys, styles)+"</ul>");
 }
 
 function cd(p) {

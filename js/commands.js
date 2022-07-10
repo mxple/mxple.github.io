@@ -245,6 +245,15 @@ function rm(p) {
     }
     let fname = path.pop();
     delete getObject(path)[fname];
+    updateCommandList();
+}
+
+function updateCommandList() {
+    let bin = getObject(["bin"]);
+    if (bin == undefined) {
+        return;
+    }
+    commandList = Object.keys(bin);
 }
 
 function rmdir(p) {

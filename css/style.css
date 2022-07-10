@@ -7,6 +7,8 @@
   --col-5: #bd93f9; /*typing-text*/
   --col-6: #ff5555; /*error*/
   --col-7: #ffb86c; /*accent*/
+  --col-8: #50fa7b;
+  --col-9: #f1fa8c;
 }
 
 body {
@@ -87,6 +89,7 @@ p {
   white-space: break-spaces;
 }
 ul {
+  justify-items: left;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
@@ -107,9 +110,13 @@ li {
 .color2 {
   color: #B89076;
 } */
+.banner {
+  text-shadow: 0 0 6px var(--col-4); 
+}
+
 .command {
-  color: var(--col-5);
-  text-shadow: 0 0 5px var(--col-5); 
+  color: var(--col-8);
+  text-shadow: 0 0 4px var(--col-8); 
 }
 .error {
   color: var(--col-6);
@@ -117,9 +124,11 @@ li {
 .white {
   color: #fff;
 }
-.normal,
-a {
+.normal {
   color: var(--col-3);
+}
+.folder {
+  color: var(--col-9);
 }
 .rainbow {
   background: linear-gradient(120deg, rgba(255,0,0,1) 0%, rgba(255,154,0,1) 10%, rgba(208,222,33,1) 20%, rgba(79,220,74,1) 30%, rgba(63,218,216,1) 40%, rgba(47,201,226,1) 50%, rgba(28,127,238,1) 60%, rgba(95,21,242,1) 70%, rgba(186,12,248,1) 80%, rgba(251,7,217,1) 90%, rgba(255,0,0,1) 100%);  
@@ -144,6 +153,7 @@ a {
 }
 
 a {
+  color: var(--col-7);
   text-decoration: inherit;
 }
 a:hover {

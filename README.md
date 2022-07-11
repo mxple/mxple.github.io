@@ -43,6 +43,8 @@ glitch.js library is from [Simon Hewitt](https://github.com/sjhewitt/glitch.js)
 
 html2canvas library is from [Niklas von Hertzen](https://github.com/niklasvh/html2canvas)
 
+DOMPurify script is from [DOMPurify](https://github.com/cure53/DOMPurify)
+
 Initial code foundation from [Forrest Knight](https://github.com/ForrestKnight)
 
 Design and inspiration from [m4tt72](https://github.com/m4tt72/terminal)

@@ -11,18 +11,44 @@
 	--col-grey: #6272a4;
 }
 
+html {
+	box-sizing: border-box;
+	position: static;
+	height: 100%;
+	-webkit-text-size-adjust: 100%;
+}
+
 body {
-	padding: 15px 20px;
-	color: var(--col-blue);
+	box-sizing: inherit;
+	position: inherit;
+	height: inherit;
+	margin:0px;
 	background: var(--col-black);
+	padding: 10px;
 	font-family: 'Source Code Pro', monospace;
-	font-size: 16px;
+	font-size: 14px;
 	line-height: 1.5em;
-	overflow-x: hidden;
-	/* breaks spaces, not words */
+	overflow: hidden;
 	overflow-wrap: break-word;
+}
+
+#border {
+	box-sizing: inherit;
+	position: inherit;
+	height: 100%;
+	padding: 15px 20px;
+	border: 2px solid var(--col-grey);
+	border-radius: .15rem;
+	overflow-y:scroll;
+	scrollbar-width: none;
+	/* breaks spaces, not words */
 	animation: show 2s steps(60, start);
 }
+
+#border::-webkit-scrollbar {
+	display: none;
+  }
+  
 
 @keyframes show {
 	from {
@@ -60,8 +86,14 @@ body {
 	color: var(--col-pink);
 }
 
+#terminal {
+	overflow-x: hidden;
+	color: var(--col-blue);
+}
+
 #textbox {
 	color: var(--col-purple);
+	overflow-x: hidden;
 }
 
 #cursor {
@@ -147,3 +179,4 @@ a:hover {
 	text-decoration: underline;
 	color: var(--col-pink);
 }
+

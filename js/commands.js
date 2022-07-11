@@ -110,7 +110,7 @@ function echo(p) {
     before.parentNode.insertBefore(next, before);
 
     if (window.screen.width > 780) {
-        window.scrollTo(0, document.body.offsetHeight);
+        border.scrollTo(0, document.body.offsetHeight);
     }
 }
 

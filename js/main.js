@@ -4,6 +4,7 @@ var cursor = document.getElementById("cursor");
 var command = document.getElementById("textbox");
 var terminal = document.getElementById("terminal");
 var textbox = document.getElementById("hiddeninput");
+var border = document.getElementById("border");
 
 var hist = [];
 var histIndex = 0;
@@ -144,7 +145,7 @@ function enterKey(e) {
 	}
 	// move cursor
 	if (!enteringPassword) {
-		cursor.style.left = -9.61 * (command.innerText.length - cursorIndex) + "px";
+		cursor.style.left = -8.4 * (command.innerText.length - cursorIndex) + "px";
 	}
 	// clear textbox (mobile only)
 	textbox.innerText = "";
@@ -175,7 +176,7 @@ function addLine(text, style) {
 	before.parentNode.insertBefore(next, before);
 
 	if (window.screen.width > 780) {
-		window.scrollTo(0, document.body.offsetHeight);
+		border.scrollTo(0, document.body.offsetHeight);
 	}
 }
 

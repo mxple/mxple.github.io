@@ -1,5 +1,5 @@
 // JSON file system object emulating standard UNIX filesystem
-var FS = {
+const FS = {
     "bin": {
         "cat": "Outputs file contents",
         "cd": "Change directories",

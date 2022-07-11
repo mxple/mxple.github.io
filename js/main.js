@@ -40,7 +40,7 @@ function enterKey(e) {
 		if (command.innerText.trim() != "") {
 			histIndex = hist.push(command.innerText);
 		}
-		addLine(cmdprompt.innerText.slice(0,-1)+"&nbsp" + command.innerText, "enteredCommand");
+		addLine(cmdprompt.innerText.slice(0, -1) + "&nbsp" + command.innerText, "enteredCommand");
 		// password mode
 		if (enteringPassword) {
 			if (pass == secret) {
@@ -175,9 +175,7 @@ function addLine(text, style) {
 
 	before.parentNode.insertBefore(next, before);
 
-	if (window.screen.width > 780) {
-		border.scrollTo(0, document.body.offsetHeight);
-	}
+	border.scrollTo(0, border.scrollHeight);
 }
 
 // updates the command prompt based on user and current directory

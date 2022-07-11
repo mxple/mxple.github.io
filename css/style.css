@@ -22,7 +22,7 @@ body {
 	box-sizing: inherit;
 	position: inherit;
 	height: inherit;
-	margin:0px;
+	margin: 0px;
 	background: var(--col-black);
 	padding: 10px;
 	font-family: 'Source Code Pro', monospace;
@@ -39,7 +39,7 @@ body {
 	padding: 15px 20px;
 	border: 2px solid var(--col-grey);
 	border-radius: .15rem;
-	overflow-y:scroll;
+	overflow-y: auto;
 	scrollbar-width: none;
 	/* breaks spaces, not words */
 	animation: show 2s steps(60, start);
@@ -47,8 +47,8 @@ body {
 
 #border::-webkit-scrollbar {
 	display: none;
-  }
-  
+}
+
 
 @keyframes show {
 	from {
@@ -179,4 +179,3 @@ a:hover {
 	text-decoration: underline;
 	color: var(--col-pink);
 }
-

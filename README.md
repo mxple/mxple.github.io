@@ -1,7 +1,7 @@
 # [mxple.github.io](https://mxple.github.io)
 A UNIX-like web terminal featuring a virtual filesystem, common UNIX commands, and lots of eye candy - all powered by Javascript. Live website: **https://mxple.github.io**
 
-<img width="893" alt="image" src="https://user-images.githubusercontent.com/83033020/178164741-47708790-aacf-4e9d-bd00-eca22c5dc611.png">
+<img width="891" alt="image" src="https://user-images.githubusercontent.com/83033020/178197985-24935553-e077-423c-be28-9fb3f7843de9.png">
 
 ## Features
 - Virtual filesystem using JSON objects

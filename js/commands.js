@@ -20,7 +20,7 @@ function cat(p) {
     }
 }
 
-// navigates the file system by changing currentDir and updates the command prompt and title of the site
+// navigates the file system by changing currentDir and updates the command prompt
 function cd(p) {
     p = p.trim();
     if (p == "..") {
@@ -31,7 +31,6 @@ function cd(p) {
         currentDir = [...parsePath(p)];
     }
     updateCmdPrompt();
-    updateTitle();
 }
 
 // clears the terminal element

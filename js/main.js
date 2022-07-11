@@ -21,7 +21,6 @@ var commandList;
 
 // init
 function init() {
-	updateTitle();
 	updateCmdPrompt();
 	updateCommandList();
 	autoType("cat banner.txt");
@@ -189,11 +188,6 @@ function updateCmdPrompt() {
 		location = "~";
 	}
 	cmdprompt.innerHTML = user + "@rinOS:" + location + end;
-}
-
-// updates the site title to match the output of "pwd"
-function updateTitle() {
-	document.title = unparsePath(currentDir);
 }
 
 // updates the commandList variable to match with the /bin folder

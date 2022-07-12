@@ -1,5 +1,5 @@
-# [mxple.github.io](https://mxple.github.io)
-A UNIX-like web terminal featuring a virtual filesystem, common UNIX commands, and lots of eye candy - all powered by Javascript. Live website: **https://mxple.github.io**
+# [mxplerin.moe](https://mxplerin.moe)
+A UNIX-like web terminal featuring a virtual filesystem, common UNIX commands, and lots of eye candy - all powered by Javascript. Live website: **https://mxplerin.moe**
 
 <img width="891" alt="image" src="https://user-images.githubusercontent.com/83033020/178197985-24935553-e077-423c-be28-9fb3f7843de9.png">
 

@@ -22,7 +22,7 @@ const FS = {
     },
     "dev": {},
     "etc": {
-        "logfile_07032005.txt": "<span class=''>[2005-03-7|12:34:35]</span> Ohno, I'm prone to losing my passwords.. Good thing I'm smart enough to leave my password in a file somewhere... <span class='error'>NOT in plaintext.</span> -signed, your system admin"
+        "logfile_07032005.txt": "<span class='error'>[2005-03-7|12:34:35]</span> Ohno, I'm prone to losing my passwords.. Good thing I'm smart enough to leave my password in a file somewhere... <span class='error'>NOT in plaintext.</span> -signed, your system admin"
     },
     "home": {
         "guest": {
@@ -39,7 +39,7 @@ Try <span class='command'>'neofetch'</span> for eye candy!<br>\
 Made with <span style='color:var(--col-6)'>♥</span> by <a href='https://github.com/mxple'>RIN</a><br> \
 </span>",
             "about.txt": "This is an interactive terminal-styled website featuring common UNIX commands. Try typing <span class='command'>'man'</span> to get started or use <span class='command'>'cat'</span> to explore the files. Have fun finding all the easter eggs!",
-            "repo.txt": "Read more about this site or report issues at <a href'https://github.com/Mxple/mxple.github.io'>https://github.com/Mxple/mxple.github.io<\a>"
+            "repo.txt": "Read more about this site or report issues at <a href='https://github.com/Mxple/mxple.github.io'>https://github.com/Mxple/mxple.github.io<\a>"
         }
     },
     "root": {

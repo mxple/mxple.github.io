@@ -187,7 +187,7 @@ function updateCmdPrompt() {
 	if ((currentDir[0] == "home" && currentDir[1] == user && currentDir.length == 2) || (currentDir[0] == user && user == "root" && currentDir.length == 1)) {
 		location = "~";
 	}
-	cmdprompt.innerHTML = user + "@rinOS:" + location + end;
+	cmdprompt.innerHTML = user + "@mxpleRIN.moe:" + location + end;
 }
 
 // updates the commandList variable to match with the /bin folder

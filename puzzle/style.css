@@ -1,0 +1,29 @@
+body {
+    background-color: #282a36;
+    pointer-events: none
+}
+.grid-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    margin-right: 38.6vh;
+    margin-left: 38.6vh;
+    grid-gap: 0px;
+    aspect-ratio: 1;
+    outline: 1px solid black;
+  }
+  .img {
+    width: 0;
+    height: 0;
+    min-height: 100%;
+    min-width: 100%;
+    object-fit: cover;
+  }
+::-moz-selection {
+    background-color: transparent;
+    color: #000;
+}
+
+::selection {
+    background-color: transparent;
+    color: #000;
+}

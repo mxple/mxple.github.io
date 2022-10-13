@@ -1,12 +1,12 @@
 body {
     background-color: #282a36;
-    pointer-events: none
+    margin: 0;
 }
 .grid-container {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    margin-right: 38.6vh;
-    margin-left: 38.6vh;
+    margin: auto;
+    max-height: 100vh;
     grid-gap: 0px;
     aspect-ratio: 1;
     outline: 1px solid black;

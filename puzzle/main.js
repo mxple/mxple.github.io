@@ -1,5 +1,5 @@
-const RED   = "<img class='img' src='https://i.imgur.com/XTGyvnc.png'>";
-const GREEN = "<img class='img' src='https://i.imgur.com/PSuDKse.png'>";
+const RED   = "<img draggable='false' class='img' src='https://i.imgur.com/XTGyvnc.png'>";
+const GREEN = "<img draggable='false' class='img' src='https://i.imgur.com/PSuDKse.png'>";
 
 class Puzzle {
     constructor() {
@@ -61,10 +61,10 @@ function draw(puzzle) {
 // begin puzzle
 var puzzle = new Puzzle();
 puzzle.randomize();
-
 draw(puzzle);
-
 $(".grid-item").click(function() {
+    this.setAttribute("draggable", false);
+
     puzzle.update(Number(this.id[1]),Number(this.id[2]));
     draw(puzzle);
 });

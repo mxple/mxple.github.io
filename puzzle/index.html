@@ -10,7 +10,9 @@
     <!-- <link rel="icon" href="./favicon.ico" type="image/x-icon"> -->
 </head>
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<body>
+
+<body oncontextmenu='return false;'>
+    <div class="game">
     <div class="grid-container" id="grid">
         <div class="grid-item" id="n00"></div>
         <div class="grid-item" id="n10"></div>
@@ -22,7 +24,10 @@
         <div class="grid-item" id="n12"></div>
         <div class="grid-item" id="n22"></div>
     </div>
-    <script src="./main2.js"></script>
+    <p>Right click to play. Left click to change conduits individually. Press R to restart, and S to toggle Solve mode.
+    </p>
+    </div>
+    <script src="./main.js"></script>
 </body>
 
 </html>

@@ -9,14 +9,14 @@ p {
   font-size: 36px;
   color: white;
 }
-.game {
+/* .game {
   display: grid;
   grid-template-columns: 1fr 1fr;
   margin: auto;
   min-height: 100vh;
   min-width: 100vw;
   grid-gap: 20px;
-}
+} */
 .grid-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;

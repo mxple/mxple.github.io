@@ -43,6 +43,12 @@ p {
   /* outline: 10px solid gold; */
 }
 
+.img:hover{
+  color: #ffffff; 
+  background: white; 
+  box-shadow: 0 0 10px white; 
+}
+
 ::-moz-selection {
   background-color: transparent;
   color: #000;

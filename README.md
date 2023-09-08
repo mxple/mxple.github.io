@@ -1,0 +1,53 @@
+# [mxple.github.io]([https://mxplerin.moe](https://mxple.github.io/terminal/))
+A UNIX-like web terminal featuring a virtual filesystem, common UNIX commands, and lots of eye candy - all powered by Javascript. Live website: **https://mxplerin.moe**
+
+<img width="891" alt="image" src="https://user-images.githubusercontent.com/83033020/178197985-24935553-e077-423c-be28-9fb3f7843de9.png">
+
+## Features
+- Virtual filesystem using JSON objects
+- Common UNIX commands to navigate, read, and write to the filesystem
+- Familiar CTRL+L and CTRL+C behavior
+- Hidden easter eggs like `rm -rf`
+- Aesthetic colors including a rainbow `neofetch` command
+
+## Quick start
+To build, simply clone the repository and use a host such as `http-server` to get started:
+```zsh
+$ git clone https://github.com/Mxple/mxple.github.io
+$ cd mxple.github.io
+$ http-server
+```
+
+## Configuring
+To add commands, create a function by the exact name of the command (must be lowercase) in `/js/commands.js` and add the function to the `FS[bin]` object (in `/js/fs.js`. The three main functions below should be able to handle all needs related to manipulating files or outputting text:
+```js
+// takes a path string and returns a path array ex. "/home/guest" --> ["home","guest"]
+parsePath(text: string) --> array
+
+// returns reference to object in path, return undefined if the path is invalid
+getObject(path: array) --> object reference
+
+// adds the input text as a new line (uses .innerHTML) and pushes the command prompt down
+addLine(text: string, style: string) --> none
+```
+
+## Credit
+Color scheme is [Dracula](https://github.com/dracula/dracula-theme)
+
+glitch-execute.js is from [Commando](https://github.com/commodo/glitch-animation-effect)
+
+glitch.js library is from [Simon Hewitt](https://github.com/sjhewitt/glitch.js)
+
+html2canvas library is from [Niklas von Hertzen](https://github.com/niklasvh/html2canvas)
+
+DOMPurify script is from [DOMPurify](https://github.com/cure53/DOMPurify)
+
+Initial code foundation from [Forrest Knight](https://github.com/ForrestKnight)
+
+Design and inspiration from [m4tt72](https://github.com/m4tt72/terminal)
+
+## Password
+<details> 
+  <summary>The password for the <code>sudo</code> command: </summary>
+   strawberry 
+</details>

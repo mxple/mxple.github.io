@@ -251,7 +251,7 @@ function neofetch(p) {
     });
     // this is actually pfetch lol
     addLine("</span style='white-space:nowrap'>\
-       .:'      "+ user + "@mxpleRIN.moe<br>\
+       .:'      "+ user + "@mxpleRIN<br>\
     _ :'_       <b>os</b>     rinOS<br>\
  .'`_`-'_``.    <b>host</b>   "+ browserName + "<br>\
 :________.-'    <b>kernel</b> 4.2.0<br>\

@@ -1,0 +1,73 @@
+:root {
+	--fg-col: #C6D0F5;
+	--bg-col: #303446;
+	--pri-col: #b7bdf8;
+	--sec-col: #676db8;
+	--acc-col: #8bd5ca;
+}
+
+* {
+	font-family: 'Space Mono', monospace;
+	font-variant-ligatures: none;
+	font-size: 1.5vh;
+}
+
+::selection {
+	background-color: var(--sec-col);
+}
+
+pre {
+	color: #91d7e3;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-weight: bold;
+	color: #8aadf4;
+}
+
+hr {
+	background: var(--fg-col);
+	border: none;
+	height: .125em;
+}
+
+a {
+	text-decoration: none
+}
+
+a:link {
+	color: var(--pri-col);
+}
+
+a:visited {
+	color: var(--sec-col);
+}
+
+a:hover {
+	color: var(--acc-col);
+}
+
+a:active {
+	color: var(--sec-col);
+}
+
+body {
+	background-color: var(--bg-col);
+	color: var(--fg-col);
+	display: flex;
+	justify-content: center;
+	align-content: center;
+	max-height: 100vw;
+	min-height: 100vh;
+	margin: 0;
+	line-height: 1.4em;
+}
+
+#card {
+	min-width: 42vw;
+	min-height: 42vh;
+	margin: auto;
+	padding: 2em;
+	border: solid var(--fg-col) 0.125em;
+	background-color: #ffffff10
+}

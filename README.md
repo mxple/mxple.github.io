@@ -1,3 +1,3 @@
-# hosting my site
+# on gitub. straight up "hosting it".
 
-site is still a work in progress
+and by "it", haha, well. let's just say. [my site](https://rin.gay/)

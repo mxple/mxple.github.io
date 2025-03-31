@@ -6,6 +6,13 @@
 	--acc-col: #8bd5ca;
 }
 
+@font-face {
+    font-family: 'Space Mono';
+    src: url('/fonts/SpaceMono-Regular.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
 * {
 	font-family: 'Space Mono', monospace;
 	font-variant-ligatures: none;
@@ -70,4 +77,13 @@ body {
 	padding: 2em;
 	border: solid var(--fg-col) 0.125em;
 	background-color: #ffffff10
+}
+
+ul {
+    margin-top: -0.5em;
+    list-style-type: none;
+}
+
+li::before {
+    content: "- ";
 }

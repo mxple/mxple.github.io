@@ -8,15 +8,36 @@
 
 @font-face {
     font-family: 'Space Mono';
-    src: url('/fonts/SpaceMono-Regular.ttf') format('truetype');
+    src: url('fonts/SpaceMono-Regular.woff') format('woff');
     font-weight: normal;
     font-style: normal;
+}
+
+@font-face {
+    font-family: 'Space Mono';
+    src: url('fonts/SpaceMono-Bold.woff') format('woff');
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Space Mono';
+    src: url('fonts/SpaceMono-Italic.woff') format('woff');
+    font-weight: normal;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: 'Space Mono';
+    src: url('fonts/SpaceMono-BoldItalic.woff') format('woff');
+    font-weight: bold;
+    font-style: italic;
 }
 
 * {
 	font-family: 'Space Mono', monospace;
 	font-variant-ligatures: none;
-	font-size: 1.5vh;
+	font-size: 1em;
 }
 
 ::selection {
@@ -32,10 +53,15 @@ h1, h2, h3, h4, h5, h6 {
 	color: #8aadf4;
 }
 
+p {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
 hr {
 	background: var(--fg-col);
 	border: none;
-	height: .125em;
+	height: 2px;
 }
 
 a {
@@ -61,7 +87,6 @@ a:active {
 body {
 	background-color: var(--bg-col);
 	color: var(--fg-col);
-	display: flex;
 	justify-content: center;
 	align-content: center;
 	max-height: 100vw;
@@ -71,19 +96,62 @@ body {
 }
 
 #card {
-	min-width: 42vw;
-	min-height: 42vh;
+	width: 0;
+	height: 0;
+	max-width: 90vw;
+	max-height: 90vh;
 	margin: auto;
-	padding: 2em;
 	border: solid var(--fg-col) 0.125em;
 	background-color: #ffffff10
 }
 
-ul {
-    margin-top: -0.5em;
-    list-style-type: none;
+#content {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
 }
 
-li::before {
-    content: "- ";
+#padder {
+  flex-grow: 1;  /* Make this div expand to fill remaining space */
+  min-height: 0; /* Prevent overflow if the content is too large */
 }
+
+#footer {
+    margin-bottom: 1em;
+}
+
+.hidden {
+    display: none;
+}
+
+.spread {
+    animation-name: spread;
+    animation-fill-mode: forwards;
+    animation-duration: 1s;
+    animation-delay: 0.4s;
+    animation-timing-function: ease;
+}
+
+@keyframes spread {
+    0% {
+        height: 0px;
+        width: 0px;
+    }
+
+    50% {
+        height: 0px;
+        width: 80%;
+        max-width: 90vw; 
+    }
+
+    100% {
+        height: 42rem; 
+        width: 56ch;
+        max-width: 90vw; 
+        padding: 0em 2em 0em 2em;
+    }
+}
+

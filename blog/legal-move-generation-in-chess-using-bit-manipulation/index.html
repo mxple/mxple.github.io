@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  
+  
+    
+  
+  <meta name="description" content="chess move generation with bit manipulation">
+
+  <title>Legal Move Generation in Chess Using Bit Manipulation</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="https://mxple.wtf/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://mxple.wtf/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://mxple.wtf/img/apple-touch-icon.png">
+  
+  <style>
+
+  /* light mode colors */
+  /* body { */
+  /*   --primary-color: #5871a2; */
+  /*   --primary-pale-color: #5871a233; */
+  /*   --primary-decoration-color: #5871a210; */
+  /*   --bg-color: #ffffff; */
+  /*   --text-color: #2f3030; */
+  /*   --text-pale-color: #767676; */
+  /*   --text-decoration-color: #a9a9a9; */
+  /*   --highlight-mark-color: #5f75b020; */
+  /**/
+  /*   --callout-note-color: #5871a2; */
+  /*   --callout-tip-color: #268556; */
+  /*   --callout-important-color: #885fc9; */
+  /*   --callout-warning-color: #ab6632; */
+  /*   --callout-caution-color: #c64e4e; */
+  /* } */
+
+  /* dark mode colors */
+  /* body.dark { */
+  /*   --primary-color: #6f8fd1; */
+  /*   --primary-pale-color: #6f8fd166; */
+  /*   --primary-decoration-color: #6f8fd112; */
+  /*   --bg-color: #1c1c1c; */
+  /*   --text-color: #c1c1c1; */
+  /*   --text-pale-color: #848484; */
+  /*   --text-decoration-color: #5f5f5f; */
+  /*   --highlight-mark-color: #8296cb3b; */
+  /**/
+  /*   --callout-note-color: #6f8fd1; */
+  /*   --callout-tip-color: #47976f; */
+  /*   --callout-important-color: #9776cd; */
+  /*   --callout-warning-color: #ad7a52; */
+  /*   --callout-caution-color: #d06161; */
+  /* } */
+  body {
+    --primary-color: #7287fd;
+    --primary-pale-color: #7287fd33;
+    --primary-decoration-color: #7287fd10;
+    --bg-color: #eff1f5;
+    --text-color: #4c4f69;
+    --text-pale-color: #6c6f85;
+    --text-decoration-color: #acb0be;
+    --highlight-mark-color: #7287fd20;
+
+    --callout-note-color: #7287fd;
+    --callout-tip-color: #179299;
+    --callout-important-color: #8839ef;
+    --callout-warning-color: #dc8a78;
+    --callout-caution-color: #e64553;
+  }
+  body.dark {
+    --primary-color: #b7bdf8;
+    --primary-pale-color: #b7bdf833;
+    --primary-decoration-color: #b7bdf810;
+    --bg-color: #24273a;
+    --text-color: #cad3f5;
+    --text-pale-color: #a5adcb;
+    --text-decoration-color: #6e738d;
+    --highlight-mark-color: #b7bdf83b;
+
+    --callout-note-color: #b7bdf8;
+    --callout-tip-color: #8bd5ca;
+    --callout-important-color: #c6a0f6;
+    --callout-warning-color: #f5a97f;
+    --callout-caution-color: #ed8796;
+  }
+
+
+  /* typography */
+  body {
+    --main-font: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --code-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --homepage-max-width: 768px;
+    --main-max-width: 768px;
+    --avatar-size: 56px;
+    --font-size: 16px;
+    --line-height: 1.75;
+    --img-border-radius: 0px;
+    --detail-border-radius: 0px;
+    --dark-mode-img-brightness: 0.75;
+    --dark-mode-chart-brightness: 0.75;
+    --inline-code-border-radius: 1px;
+    --inline-code-bg-color: var(--primary-decoration-color);
+    --block-code-border-radius: 0px;
+    --block-code-border-color: var(--primary-color);
+    --detail-border-color: var(--primary-color);
+  }
+
+</style>
+
+  <link rel="stylesheet" href="https://mxple.wtf/main.css">
+  
+
+<link id="hl" rel="stylesheet" type="text/css" href="/hl-light.css" />
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" integrity="sha384-HORx6nWi8j5/mYA+y57/9/CZc5z8HnEw4WUZWy5yOn9ToKBv1l58vJaufFAn9Zzi" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+            throwOnError: false
+        });
+    });
+</script>
+
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="75d8f5b5-c3fa-4a2f-a512-35dd1f205b09"></script>
+
+</head>
+
+<body class="post">
+  
+  <script>
+    const theme = sessionStorage.getItem('theme');
+    const match = window.matchMedia("(prefers-color-scheme: dark)").matches
+    if ((theme && theme == 'dark') || (!theme && match)) {
+      document.body.classList.add('dark');
+      const hl = document.querySelector('link#hl');
+      if (hl) hl.href = 'https://mxple.wtf/hl-dark.css';
+    }
+  </script>
+  
+  
+<div id="wrapper">
+  <div id="blank"></div>
+  <aside>
+    
+    
+    <nav>
+      <ul>
+        
+        <li>
+          <a class="h2" href="#what-is-move-generation">What is Move Generation?</a>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#bitboards">Bitboards</a>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#pseudo-legal-move-generation">Pseudo-Legal Move Generation</a>
+          
+          <ul>
+            
+            <li>
+              <a class="h3" href="#pext-hashing">PEXT Hashing</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#special-moves">Special Moves</a>
+            </li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#legal-move-generation">Legal Move Generation</a>
+          
+          <ul>
+            
+            <li>
+              <a class="h3" href="#check-mask">Check Mask</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#pin-mask">Pin Mask</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#putting-it-all-together">Putting it All Together</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#king-moves">King Moves</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#enpassant">Enpassant</a>
+            </li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#final-notes">Final Notes</a>
+          
+        </li>
+        
+      </ul>
+    </nav>
+    
+    
+    <button id="back-to-top" aria-label="back to top">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+
+    </button>
+    
+  </aside>
+  <main>
+    
+<header>
+  <nav>
+    <a href="https:&#x2F;&#x2F;mxple.wtf&#x2F;blog">← Back</a>
+  </nav>
+</header>
+
+
+    <div>
+      
+      
+      
+      
+      <div id="copy-cfg" style="display: none;" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+"></div>
+      
+      <article class="prose">
+        <h1>Legal Move Generation in Chess Using Bit Manipulation</h1>
+        <div id="post-info">
+          <div id="date">
+            <span id="publish">Apr 20, 2025</span>
+            <br>
+            <span class="reading-time"><em>17 minute read</em></span>
+          </div>
+
+          
+        </div>
+
+        
+        
+
+        
+
+        <p><em>This post is part of my series on making Shiro, a chess engine written in Rust.</em></p>
+<p>Recently, watching <a rel="nofollow noreferrer" href="https://www.youtube.com/watch?v=U4ogK0MIzqk">Sebastian Lague's Chess Coding Adventure
+video</a> has inspired me to make my
+own chess engine. I'm naming the engine <em>Shiro</em> (white in Japanese (しろ/白)),
+after a certain chess-playing anime character. I set my sights set high, aiming
+to achieve 3000 elo.</p>
+<p>To play like a grandmaster though, aside from having strong heuristics and
+search optimizations, an engine must be fast. Searching millions of positions
+is no easy task and with every bit of additional computation capacity, an
+engine grows slightly stronger. Hence, I chose to use Rust due to its speed and
+rising popularity.</p>
+<p>More important than language, the implementation must also be efficient, so I
+made it a point to not cut corners and use the fastest implementations at each
+stage of the engine. With goals set in place, we can begin implementing Shiro.
+We begin with move generation, the first feature of any chess engine.</p>
+<h1 id="what-is-move-generation">What is Move Generation?<a class="zola-anchor" href="#what-is-move-generation" aria-label="Anchor link for: what-is-move-generation" style="visibility: hidden;"></a>
+</h1>
+<p>Move generation is the process of taking in a chess position (board state) and
+generating the available moves of each piece. Move generation can either be
+legal (only legal moves allowed) or pseudo-legal (some moves may be illegal,
+leaving the king in check).</p>
+
+<blockquote class="callout note has-title">
+  
+  
+  <p class="title">
+    <span class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path></svg>
+
+    </span>
+    <strong>What is counted as move generation?</strong>
+  </p>
+  <div class="content">
+    <p>At the time of writing, I learned that its
+typically better to do pseudo-legal generation and check legality later due to
+the nature of <a rel="nofollow noreferrer" href="https://www.chessprogramming.org/Alpha-Beta">alpha-beta pruning</a>
+combined with <a rel="nofollow noreferrer" href="https://www.chessprogramming.org/Move_Ordering">move-ordering</a>.
+However, I did not know about this while writing my move generator, so I chose
+to generate only legal moves.</p>
+
+  </div>
+  
+</blockquote>
+
+<p>There are many ways to perform move generation, but they all boil down to
+teaching a computer program the rules of chess. The hard part of move
+generation is going from pseudo-legal moves to legal moves, and the handling of
+some special moves like enpassant (seriously, why is that in the game) and
+castles.</p>
+<p>One method would be to generate all pseudo-legal moves, then prune out illegal
+moves by simulating each move and checking whether our king is in check (can be
+captured by an opponent move). This is extremely slow since generating a single
+legal move involves generating all the pseudo-legal moves of the next depth as
+well. There are techniques to improve this method, such as ensuring king safety
+by checking the squares along axis of the king, which make it viable. With
+optimizations, this form of move generation can usually search up to 100
+million nodes per second (nps).</p>
+
+<blockquote class="callout note has-title">
+  
+  
+  <p class="title">
+    <span class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path></svg>
+
+    </span>
+    <strong>How do we benchmark move generation?</strong>
+  </p>
+  <div class="content">
+    <p>"Search up to 100 million nps" is a bit misleading. The typical benchmark for
+move generation is <a rel="nofollow noreferrer" href="https://www.chessprogramming.org/Perft">perft</a>, which
+counts how many possible board configurations there are after x ply. Move
+generators running perft will usually not explore the last layer of search
+(leaf nodes). Instead, they opt to simply count up configurations, making a big
+difference to perceived speed.</p>
+
+  </div>
+  
+</blockquote>
+
+<p>Despite this being the most common class of move generators, there is another
+method to go much <em>much</em> faster. Using a <strong>bitboard</strong> representation of the
+game, precomputed lookup maps, and some clever translation of chess rules into
+bitwise operations, move generators can go incredibly fast. The fastest move
+generators in the world use the techniques outlined here. The fastest,
+<a rel="nofollow noreferrer" href="https://github.com/Gigantua/Gigantua">Gigantua</a> at 1.6 billion nps, has a
+great
+<a rel="nofollow noreferrer" href="https://www.codeproject.com/Articles/5313417/Worlds-fastest-Bitboard-Chess-Movegenerator">explanation</a>
+very similar to the techniques discussed in this post.</p>
+<h1 id="bitboards">Bitboards<a class="zola-anchor" href="#bitboards" aria-label="Anchor link for: bitboards" style="visibility: hidden;"></a>
+</h1>
+<blockquote>
+<p>Chess as a computation problem presents unique opportunities for optimization.</p>
+</blockquote>
+<p>Using a single <code>u64</code> integer as a bitmask, we can represent the <strong>occupancy
+status</strong> of all 64 squares on a chess board. So with just 8 <code>u64</code>s, we can encode
+the positions of all 6 piece types and the 2 colors. Specifically, we encode
+the positions of all pawns (regardless of color) into a single bitboard, and
+then bitwise AND the pawn bitboard with a color bitboard to get all pawns of a
+color.</p>
+<p>Not only are bitboards extremely space-efficient, they also lend themselves to
+bitwise operations to easily <strong>alter gamestate</strong> and <strong>query information</strong>. For
+example, to generate all single pawn pushes for black, we can simply do
+<code>((BLACK &amp; PAWNS) &gt;&gt; 8) &amp; EMPTY</code>. This is saying "select pieces that are both
+black and pawns, move them down a square, and ensure the target square is
+empty." The resultant bitboard will have a bit set everywhere a black pawn can
+move to in a single push. In just a few cpu instructions, we generated
+(pseudo-legal) pawn moves that would otherwise take a different board
+representation dozens of if-statements and far more memory.</p>
+<style>
+.container1 {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 8px;
+}
+</style>
+<div class="container1">
+<figure>
+    <img src="ex_white.png"  alt="example white position">
+    
+    <figcaption></figcaption>
+    
+</figure>
+
+<pre class="z-code"><code><span class="z-text z-plain">White&#39;s occupancy is represented by 0x0000201840014206
+</span><span class="z-text z-plain">  . . . . . . . .  =&gt; 0 0
+</span><span class="z-text z-plain">  . . . . . . . .  =&gt; 0 0
+</span><span class="z-text z-plain">  . . X . . . . .  =&gt; 2 0
+</span><span class="z-text z-plain">  . . . X X . . .  =&gt; 1 8
+</span><span class="z-text z-plain">  . X . . . . . .  =&gt; 4 0
+</span><span class="z-text z-plain">  . . . . . . . X  =&gt; 0 1
+</span><span class="z-text z-plain">  . X . . . . X .  =&gt; 4 2
+</span><span class="z-text z-plain">  . . . . . X X .  =&gt; 0 6
+</span></code></pre>
+</div>
+<p>Using functions like <code>.trailing_zeroes()</code> combined with other bit operations
+allows us to loop over the set bits, extracting individual piece positions or
+moves from bitboards.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Generating and extracting pawn pushes (contrived example)
+</span></span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> bitboard<span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u64</span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-other z-rust">BLACK</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">PAWNS</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">8</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-keyword z-control z-rust">while</span> bitboard <span class="z-keyword z-operator z-comparison z-rust">!=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> pos <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">63</span> <span class="z-keyword z-operator z-arithmetic z-rust">-</span> bitboard<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">trailing_zeroes</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    bitboard <span class="z-keyword z-operator z-assignment z-rust">&amp;=</span> bitboard <span class="z-keyword z-operator z-arithmetic z-rust">-</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span><span class="z-punctuation z-terminator z-rust">;</span>   <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> turns off rightmost 1
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    moves<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">add</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-path z-rust">MoveType<span class="z-punctuation z-accessor z-rust">::</span></span><span class="z-constant z-other z-rust">PAWN</span><span class="z-punctuation z-separator z-rust">,</span> pos <span class="z-keyword z-operator z-arithmetic z-rust">-</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">8</span><span class="z-punctuation z-separator z-rust">,</span> pos</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></code></pre>
+
+<blockquote class="callout note has-title">
+  
+  
+  <p class="title">
+    <span class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path></svg>
+
+    </span>
+    <strong>Leading vs. Trailing Zeroes</strong>
+  </p>
+  <div class="content">
+    <p>Trailing zeroes is non-trivially faster than leading zeroes due to hardware
+support (<code>TZCNT</code> and <code>BSLR</code>). Note, we subtract from 63 since counting square
+position starting from the top-left corner is more intuitive.</p>
+
+  </div>
+  
+</blockquote>
+
+<p>Hopefully I have convinced you of the speed and elegance bitboards offer. Next,
+lets see how we can use bitboards to generate moves, or in other words, encode
+the rules of chess into bitboards.</p>
+<h1 id="pseudo-legal-move-generation">Pseudo-Legal Move Generation<a class="zola-anchor" href="#pseudo-legal-move-generation" aria-label="Anchor link for: pseudo-legal-move-generation" style="visibility: hidden;"></a>
+</h1>
+<p>With bitboards, we can generate pseudo-legal moves very efficiently. The trick
+is to use <strong>precomputed lookup maps</strong> to query for the pseudo-legal moves for a
+given piece. In other words, given a piece's position, we can instantly look up
+all of its possible move inside an array.</p>
+<p>For the knights and kings, these lookup maps look something like:</p>
+<div class="container">
+<figure>
+    <img src="knight_move_mask.png"  alt="knight move mask">
+    
+    <figcaption>The 34th entry of the knight move lookup array should be this mask</figcaption>
+    
+</figure>
+
+<figure>
+    <img src="knight_move_mask2.png"  alt="knight move mask 2">
+    
+    <figcaption>Some masks will have fewer moves near the edge</figcaption>
+    
+</figure>
+
+<figure>
+    <img src="king_move_mask.png"  alt="king move mask">
+    
+    <figcaption>King moves are encoded the same way</figcaption>
+    
+</figure>
+
+</div>
+<p>Both black and white pieces can use the same lookup maps since they move the
+same way. These lookup maps move computation from runtime to compile-time,
+making pseudo-legal move generation practically free.</p>
+<p>The slider pieces (rooks, bishops, queens) work a bit differently since they
+can be blocked. A rook can move horizontally and vertically, but its attack
+rays are stopped by blockers (both ally and opponent pieces block line of
+sight). We <em>could</em> simply store these rays in lookup tables and then check
+along the rays for presence of blockers, but that's far too slow. We would
+require 4 additional loops per piece, each having to do condition checks. Doing
+that would defeat the point of bitboards as it would probably be faster to do
+this looping using other board representations.</p>
+
+<blockquote class="callout note has-title">
+  
+  
+  <p class="title">
+    <span class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path></svg>
+
+    </span>
+    <strong>A note on queens</strong>
+  </p>
+  <div class="content">
+    <p>Queen moves are best generated by counting a queen as both a rook and bishop.
+This is simple, works well, and avoids extra logic.</p>
+
+  </div>
+  
+</blockquote>
+
+<p>Luckily, with some cleverness, bitboards can handle slider moves faster than
+any other representation. To take advantage of bitboards and generate slider
+moves in the presence of blockers, we can incorporate the presence of blockers
+into the lookup map. In other words, before, we had a function that mapped piece
+position to possible moves. Now our goal is to make a function that maps piece
+position <strong>and</strong> blocker positions to possible moves.</p>
+<p>Notice for any slider piece, only the 14 squares on its attack axes need to be
+checked for blockers. Since each square is either empty or occupied, there are
+$2^{14} = 4096$ possible permutations of blockers. If we could somehow
+perfectly hash every permutation of occupancy down to a range of $[0,4096)$, we
+could make a lookup map for sliders. Specifically, our goal is this:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">static</span> <span class="z-constant z-other z-rust">ROOK_MOVES_LOOKUP</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-storage z-type z-rust">u64</span><span class="z-punctuation z-separator z-rust">;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">4096</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-punctuation z-separator z-rust">;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">64</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-keyword z-operator z-range z-rust">...</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust">
+</span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">get_rook_moves</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">rook_pos</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>, <span class="z-variable z-parameter z-rust">occupied</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u64</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> rook_attack_axes <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-other z-rust">ORTHOGONAL_RAY_LOOKUP</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>rook_pos<span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-punctuation z-terminator z-rust">;</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> 14 bits will be set
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> blockers <span class="z-keyword z-operator z-assignment z-rust">=</span> rook_attack_axes <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> occupied<span class="z-punctuation z-terminator z-rust">;</span> 
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> hash <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-function z-rust">perfect_hash</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>blockers</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-support z-macro z-rust">assert!</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-keyword z-operator z-comparison z-rust">&lt;=</span> hash <span class="z-keyword z-operator z-logical z-rust">&amp;&amp;</span> hash <span class="z-keyword z-operator z-comparison z-rust">&lt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">4096</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">return</span> <span class="z-constant z-other z-rust">ROOK_MOVES_LOOKUP</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>rook_pos<span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>hash<span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>A 2MiB static array may seem like a lot, but it's the necessary price we pay
+for performance. Far more attention-worthy is the implementation of this
+perfect_hash function. How can we perfectly hash every permutation blockers in
+reasonable time? Enter <code>PDEP/PEXT</code> instructions...</p>
+<h2 id="pext-hashing">PEXT Hashing<a class="zola-anchor" href="#pext-hashing" aria-label="Anchor link for: pext-hashing" style="visibility: hidden;"></a>
+</h2>
+<p>In my opinion, one of the few great things to come out of CISC instruction sets
+is the <strong>pext</strong>/<strong>pdep</strong> instructions. These machine instructions can rearrange
+the bits of one register according to the mask provided by another. As a
+result, we can very quickly and perfectly hash occupancy bitboards.</p>
+<p>To visualize how <code>PEXT</code> works, here's a small 16-bit example:</p>
+<pre class="z-code"><code><span class="z-text z-plain">input  : 0b_0010_1010_0011_0101
+</span><span class="z-text z-plain">mask   : 0b_0010_1100_0010_1110
+</span><span class="z-text z-plain">output : 0b_0000_0000_0110_1010
+</span></code></pre>
+<p>The bits of the input are <strong>extracted</strong> according the mask and then put
+together to form the 7 right bits of the output (there are 7 bits set in the
+mask). <code>PDEP</code> works the exact opposite, instead <strong>depositing</strong> the least
+significant bits of the input onto the output.</p>
+<p>With these two instructions, we can efficiently hash the blocker mask to generate slider moves.</p>
+
+<blockquote class="callout note has-title">
+  
+  
+  <p class="title">
+    <span class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path></svg>
+
+    </span>
+    <strong>Architecture support</strong>
+  </p>
+  <div class="content">
+    <p><code>PEXT</code> and <code>PDEP</code> came along in Intel's <code>bmi2</code> extension set. It first appeared
+around 2013 and is widely supported by most modern x86 CPUs today. The
+instruction(s) are extremely niche but for chess engines, they are the best
+thing since sliced bread. In the rare case a microarchitecture does not support
+<code>PEXT</code>, other perfect hash methods exist, like <a rel="nofollow noreferrer" href="https://www.chessprogramming.org/Magic_Bitboards">magic number
+hashing</a> and <a rel="nofollow noreferrer" href="https://www.chessprogramming.org/First_Rank_Attacks">first rank
+attacks</a>.</p>
+
+  </div>
+  
+</blockquote>
+
+<div class="container">
+<figure>
+    <img src="rook_rays.png"  alt="rook attack axes">
+    
+    <figcaption>Rook&#x27;s attack axes</figcaption>
+    
+</figure>
+
+<figure>
+    <img src="blockers.png"  alt="highlighted blockers">
+    
+    <figcaption>Blocker occupancy mask</figcaption>
+    
+</figure>
+
+<figure>
+    <img src="rook_moves.png"  alt="rook&#x27;s possible moves">
+    
+    <figcaption>Rook&#x27;s pseudo-legal moves.</figcaption>
+    
+</figure>
+
+</div>
+<p>I won't bore you with the construction of these lookup maps; they can be dumb,
+slow, and simple since they are computed only once (ideally at compile-time).</p>
+<p>The result is pseudo-legal move lookups in just a few assembly instructions.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">get_rook_moves</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">pos</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span>, <span class="z-variable z-parameter z-rust">occupied</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u64</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> <span class="z-storage z-type z-rust">u64</span></span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-other z-rust">PEXT_ORTHO_LOOKUP</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>pos<span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-support z-function z-rust">_pext_u64</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>occupied<span class="z-punctuation z-separator z-rust">,</span> <span class="z-constant z-other z-rust">ORTHO_RAY_LOOKUP</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>pos<span class="z-punctuation z-section z-group z-end z-rust">]</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>A few things of note though, the bishop lookup map can be 4 times
+smaller---512KiB---since we don't need to care about the presence of blockers
+on the edge of the board when it comes to bishops (take a moment to convince
+yourself of this fact). The rook lookup however, does need the additional
+squares on the edge since a rook on an edge needs to check for blockers along
+that edge.</p>
+<p>Another interesting implementation detail: I used a <code>build.rs</code> script to
+generate these lookup maps as literals, since Rust's support for <code>const fn</code> is
+pretty limited, particularly when it comes to loops and intrinsics.
+Surprisingly, rustc was able to parse through the additional megabytes of code
+fairly quickly.</p>
+<h2 id="special-moves">Special Moves<a class="zola-anchor" href="#special-moves" aria-label="Anchor link for: special-moves" style="visibility: hidden;"></a>
+</h2>
+<p>Pawn moves do not use lookup maps; instead, we can use bit shifting to generate
+pushes, double-pushes, captures, and promotions for all pawns at once.</p>
+<p>As a quick example, to generate pseudo-legal pawn captures for white, we do</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> left_captures  <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-other z-rust">WHITE</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">PAWNS</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-keyword z-operator z-logical z-rust">!</span><span class="z-constant z-other z-rust">FILEA</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-comparison z-rust">&lt;</span><span class="z-keyword z-operator z-comparison z-rust">&lt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">9</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">BLACK</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> right_captures <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-other z-rust">WHITE</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">PAWNS</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-keyword z-operator z-logical z-rust">!</span><span class="z-constant z-other z-rust">FILEH</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-comparison z-rust">&lt;</span><span class="z-keyword z-operator z-comparison z-rust">&lt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">7</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">BLACK</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>To find possible promotions, we can mask out <code>pawn_moves &amp; RANK8</code>.</p>
+<p>It turns out, applying chess knowledge as bit manipulation is surprisingly
+elegant and enables fast pseudo-legal move generation. However, our goal is
+legal move generation, which is the real challenge.</p>
+
+<blockquote class="callout note has-title">
+  
+  
+  <p class="title">
+    <span class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path></svg>
+
+    </span>
+    <strong>What about castling and enpassant?</strong>
+  </p>
+  <div class="content">
+    <p>enpassant and castling must be more-or-less hardcoded. However, there are a few
+caveats so we will revisit these two later.</p>
+
+  </div>
+  
+</blockquote>
+
+<h1 id="legal-move-generation">Legal Move Generation<a class="zola-anchor" href="#legal-move-generation" aria-label="Anchor link for: legal-move-generation" style="visibility: hidden;"></a>
+</h1>
+<p>The next step is to prune out illegal moves. Surprisingly (or maybe not), move
+legality can also be checked quickly using bit magic. To get from pseudo-legal
+moves to legal moves, we really just have to check one condition: will this
+move leave the king in check?</p>
+<p>There are 3 types of pseudo-legal moves that leave the king in check:</p>
+<ol>
+<li>Not taking care of an existing check (blocking, capturing, or moving king).</li>
+<li>Moving a pinned piece.</li>
+<li>Moving the king into enemy line of sight.</li>
+</ol>
+<p>The core idea to handling all 3 of these cases it to make special masks that
+mask out illegal bits. When preparing to generate moves for a position, we will
+generate a check mask, pin mask, and seen mask to handle each of the three
+cases respectively.</p>
+<h2 id="check-mask">Check Mask<a class="zola-anchor" href="#check-mask" aria-label="Anchor link for: check-mask" style="visibility: hidden;"></a>
+</h2>
+<p>The check mask is used to prune illegal moves when the king is in check.
+Specifically, we want to keep only moves that block the check or capture the
+attacking piece. Our goal is to be able to prune pseudo legal moves with a
+simple <code>&amp;</code> operation:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> legal_moves <span class="z-keyword z-operator z-assignment z-rust">=</span> pseudo_legal_moves <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> checkmask<span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>There are 3 cases to consider:</p>
+<ol>
+<li>No checks: If the king is not in check, every bit of the check mask is set (ANDing will do nothing).</li>
+<li>One check: This is the interesting case; we will cover this in depth.</li>
+<li>Two checks: No piece other than the king can move in double-check, so the check mask is 0.</li>
+</ol>
+<div class="container">
+<figure>
+    <img src="knight_pseudolegal.png"  alt="pseudo legal moves of a knight">
+    
+    <figcaption>The knight&#x27;s pseudo-legal moves</figcaption>
+    
+</figure>
+
+<figure>
+    <img src="checkmask.png"  alt="check mask">
+    
+    <figcaption>Check mask</figcaption>
+    
+</figure>
+
+<figure>
+    <img src="checkmask_and_knight.png"  alt="knight legal moves">
+    
+    <figcaption>AND to get knight&#x27;s legal moves</figcaption>
+    
+</figure>
+
+</div>
+<p>Note, if the king were checked by a knight, the check mask would have the
+knight's position's bit set.</p>
+<p>With the check mask, we can prune all illegal moves when the king is in check
+with a single bitwise AND. There is a little overhead to computing the check
+mask, but it's only done once per position, and can be done simultaneously with
+the pin mask, which we will look at next.</p>
+<h2 id="pin-mask">Pin Mask<a class="zola-anchor" href="#pin-mask" aria-label="Anchor link for: pin-mask" style="visibility: hidden;"></a>
+</h2>
+<p>The pin mask is the same idea but there's a bit more nuance. With the pin mask,
+we want to be able to <strong>select all pinned pieces</strong> and then <strong>generate legal
+moves of pinned pieces</strong>.</p>
+<p>The pinned mask is defined as follows:</p>
+<blockquote>
+<p>A bit of the pinned mask is set if it lies on a ray from an opponent slider
+to the ally king AND that ray contains exactly one blocking piece. The
+opponent slider is included, and the ally king is excluded.</p>
+</blockquote>
+<p>Let's see an example (black to move):</p>
+<style>
+.container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+</style>
+<div class="container">
+<figure>
+    <img src="pinmask_hv.png"  alt="orthogonal pinmask">
+    
+    <figcaption>Orthogonal pin mask</figcaption>
+    
+</figure>
+
+<figure>
+    <img src="pinmask_dg.png"  alt="vertical pinmask">
+    
+    <figcaption>Diagonal pin mask</figcaption>
+    
+</figure>
+
+<figure>
+    <img src="pinmask.png"  alt="pinmask">
+    
+    <figcaption>Combined pin mask</figcaption>
+    
+</figure>
+
+</div>
+<p>Observe, <strong>a pinned piece can only move along its pinned axis</strong>. To select pinned pieces, we can do</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> pinned_rooks <span class="z-keyword z-operator z-assignment z-rust">=</span> ally_mask <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">ROOKS</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> pin_mask<span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>Then to generate its moves (separate from unpinned pieces):</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> pinned_rook_moves <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-function z-rust">get_rook_moves</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pinned_rooks<span class="z-punctuation z-separator z-rust">,</span> opponent_occupancy</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> pin_mask_ortho<span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>Note, we actually have 2 pin masks: one for orthogonal rays and one for
+diagonal rays. (The combined pin mask is <code>pin_mask_ortho | pin_mask_diag</code>). This
+is to prevent cases like re4 being a legal move in the example above.</p>
+<p>Pinned knights can never move since they can't move on any pinned axis. Pinned
+queens don't need any special handling if they are treated as a combined rook
+and bishop. Pinned pawns are a little trickier, but generally, use
+<code>pin_mask_ortho</code> for pushes, <code>pin_mask_diag</code> for captures, and for enpassant...
+we'll talk about it later.</p>
+
+<blockquote class="callout note has-title">
+  
+  
+  <p class="title">
+    <span class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path></svg>
+
+    </span>
+    <strong>Computing check and pin masks</strong>
+  </p>
+  <div class="content">
+    <p>Computing these masks fast is important. Try to squeeze as much of the computation
+into lookup tables and bit tricks as possible. My implementation first checks
+whether an enemy pawn can capture the king, then knights, and finally looping
+through the rays of the king.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-keyword z-control z-rust">for</span> attacker_sqr <span class="z-keyword z-operator z-rust">in</span> opponent_sliders_ortho<span class="z-punctuation z-separator z-rust">:</span>
+</span><span class="z-source z-rust">    <span class="z-storage z-type z-rust">let</span> attack_mask <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-function z-rust">ortho_ray_lookup</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>attacker_sqr</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust">    <span class="z-keyword z-control z-rust">if</span> attack_mask <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> ally_king <span class="z-keyword z-operator z-comparison z-rust">!=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>   <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Same axis, potential check found
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> ray <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-function z-rust">get_ray_between</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>king_sqr<span class="z-punctuation z-separator z-rust">,</span> attacker_sqr</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> 64x64 lookup table
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> blockers <span class="z-keyword z-operator z-assignment z-rust">=</span> ray <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> occupied<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">        <span class="z-keyword z-control z-rust">match</span> blockers<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">count_ones</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>   <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> How many blockers along ray?
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-keyword z-operator z-rust">=&gt;</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">                checks <span class="z-keyword z-operator z-assignment z-rust">+=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span><span class="z-punctuation z-terminator z-rust">;</span>    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Count checks to determine if in double check
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">                checkmask <span class="z-keyword z-operator z-assignment z-rust">|=</span> ray<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">                checkmask<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">set_bit</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>attacker_sqr</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span> <span class="z-keyword z-operator z-rust">=&gt;</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">                pinmask_hv <span class="z-keyword z-operator z-assignment z-rust">|=</span> ray<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">                pinmask_hv<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">set_bit</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>attacker_sqr</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-keyword z-operator z-rust">_</span> <span class="z-keyword z-operator z-rust">=&gt;</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span> <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> blocked by &gt; 1 piece (safe)
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust">}
+</span></code></pre>
+
+  </div>
+  
+</blockquote>
+
+<h2 id="putting-it-all-together">Putting it All Together<a class="zola-anchor" href="#putting-it-all-together" aria-label="Anchor link for: putting-it-all-together" style="visibility: hidden;"></a>
+</h2>
+<p>With check and pin masks at our disposal, we can generate <strong>legal</strong> moves for
+knights, sliders, and pawns! To prove my point, I'll run through some of the
+trickiest examples:</p>
+<p>To generate legal double pushes for white pawns,</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> pin_mask_horiz <span class="z-keyword z-operator z-assignment z-rust">=</span> pin_mask_ortho <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-support z-function z-rust">rank_of_square</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>our_king</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> movable_pawns <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-other z-rust">PAWNS</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">WHITE</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-keyword z-operator z-logical z-rust">!</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pin_mask_diag <span class="z-keyword z-operator z-bitwise z-rust">|</span> pin_mask_horiz</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> single_pushes <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>movable_pawns <span class="z-keyword z-operator z-comparison z-rust">&lt;</span><span class="z-keyword z-operator z-comparison z-rust">&lt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">8</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> empty<span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> double_pushes <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>single_pushes <span class="z-keyword z-operator z-comparison z-rust">&lt;</span><span class="z-keyword z-operator z-comparison z-rust">&lt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">8</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> empty <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">RANK4</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> checkmask<span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>Note, we generate single pushes first, since if we went straight to double
+pushes, our pawns pawns would be able to jump over other pieces. Additionally,
+we extract the horizontal pin mask, since horizontally pinned pawns can never
+move (but vertically pinned ones can).</p>
+<p>To generate legal captures for black pawns,</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> relevant_pawns <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-other z-rust">BLACK</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">PAWNS</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-keyword z-operator z-logical z-rust">!</span>pin_mask_ortho<span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> pinned <span class="z-keyword z-operator z-assignment z-rust">=</span> relevant_pawns <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> pin_mask_diag<span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> unpinned <span class="z-keyword z-operator z-assignment z-rust">=</span> relevant_pawns <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-keyword z-operator z-logical z-rust">!</span>pin_mask_diag<span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> left_captures <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>   <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>unpinned <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-keyword z-operator z-logical z-rust">!</span><span class="z-constant z-other z-rust">FILEA</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">7</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">|</span> 
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">                        <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pinned <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-keyword z-operator z-logical z-rust">!</span><span class="z-constant z-other z-rust">FILEA</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">7</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> pinmask_diag 
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">                    </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">WHITE</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> checkmask
+</span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> right_captures <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>   <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>unpinned <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-keyword z-operator z-logical z-rust">!</span><span class="z-constant z-other z-rust">FILEA</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">9</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">|</span> 
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">                        <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pinned <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-keyword z-operator z-logical z-rust">!</span><span class="z-constant z-other z-rust">FILEA</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">9</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> pinmask_diag 
+</span></span><span class="z-source z-rust"><span class="z-meta z-group z-rust">                    </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">WHITE</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> checkmask
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> bonus: promotions
+</span></span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> promotions <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>left_captures <span class="z-keyword z-operator z-bitwise z-rust">|</span> right_captures</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">RANK1</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>For all moves except pawn pushes, pinned and unpinned pieces should be handled
+separately.</p>
+<p>And finally, to run through an entire example for the sake of completeness,</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">generate_ortho_slider_moves</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> get all relevant masks and bitboards
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> sliders_ortho <span class="z-keyword z-operator z-assignment z-rust">=</span> ally_mask <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">ROOKS</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-constant z-other z-rust">QUEENS</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> pinned <span class="z-keyword z-operator z-assignment z-rust">=</span> sliders_ortho <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> pin_mask_ortho<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> unpinned <span class="z-keyword z-operator z-assignment z-rust">=</span> sliders_ortho <span class="z-keyword z-operator z-bitwise z-rust">^</span> pinned<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">while</span> pinned <span class="z-keyword z-operator z-comparison z-rust">!=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> pos <span class="z-keyword z-operator z-assignment z-rust">=</span> pinned<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">pop_rightmost_bit</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> moves <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-function z-rust">get_rook_moves</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pos<span class="z-punctuation z-separator z-rust">,</span> occupied</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-keyword z-operator z-logical z-rust">!</span>ally_mask</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>          <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> we can land on enemy or empty squares
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>checkmask</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pinmask_ortho</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-keyword z-control z-rust">while</span> moves <span class="z-keyword z-operator z-comparison z-rust">!=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-storage z-type z-rust">let</span> target <span class="z-keyword z-operator z-assignment z-rust">=</span> moves<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">pop_rightmost_bit</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-support z-function z-rust">add_move</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-path z-rust">Variant<span class="z-punctuation z-accessor z-rust">::</span></span>Normal<span class="z-punctuation z-separator z-rust">,</span> pos<span class="z-punctuation z-separator z-rust">,</span> target</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">while</span> unpinned <span class="z-keyword z-operator z-comparison z-rust">!=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> pos <span class="z-keyword z-operator z-assignment z-rust">=</span> unpinned<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">pop_rightmost_bit</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> moves <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-function z-rust">pext_hv_lookup</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pos<span class="z-punctuation z-separator z-rust">,</span> occupied</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-keyword z-operator z-logical z-rust">!</span>ally_mask</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>checkmask</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-keyword z-control z-rust">while</span> moves <span class="z-keyword z-operator z-comparison z-rust">!=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-storage z-type z-rust">let</span> target <span class="z-keyword z-operator z-assignment z-rust">=</span> moves<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">pop_rightmost</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-support z-function z-rust">add_move</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-path z-rust">Variant<span class="z-punctuation z-accessor z-rust">::</span></span>Normal<span class="z-punctuation z-separator z-rust">,</span> pos<span class="z-punctuation z-separator z-rust">,</span> target</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span><span class="z-source z-rust">
+</span></code></pre>
+<p>Notice that in all these examples, the only operations going on are simple bit
+ops. There's a few branches in the form of bit loops, but they are unavoidable.
+As a result, move generation is blazingly fast.</p>
+<h2 id="king-moves">King Moves<a class="zola-anchor" href="#king-moves" aria-label="Anchor link for: king-moves" style="visibility: hidden;"></a>
+</h2>
+<p>There's one last move type and mask we haven't talked about yet: king moves and
+the seen mask. King moves are unique since the king cannot move to a square
+that is "seen" by an opponent piece. The fastest way to handle king moves is to
+build a "seen" mask which has a bit set for every square an enemy piece can
+move to. (This includes pinned enemy pieces; ie, we cannot move into the line
+of sight of a pinned enemy rook). Then, to generate king moves, we do:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> moves <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-function z-rust">king_lookup</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>king_pos</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> enemy_or_empty <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span> <span class="z-keyword z-operator z-logical z-rust">!</span>seen_by_enemy<span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>Another benefit of this <code>seen_by_enemy</code> mask is that we can use it to generate
+castle moves. Since a king cannot castle if the squares between it and the rook
+are attacked by an opponent, we can AND the castle path with the
+<code>seen_by_enemy</code> mask to find whether we are allowed to castle.</p>
+
+<blockquote class="callout note has-title">
+  
+  
+  <p class="title">
+    <span class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path></svg>
+
+    </span>
+    <strong>Computing the seen mask</strong>
+  </p>
+  <div class="content">
+    <p>The <code>seen_by_enemy</code> mask is easily computed using the lookup maps for each
+piece. Just loop over each piece and OR the result of its lookup map to the
+seen mask. Pawns can be computed all at once with shifting.</p>
+
+  </div>
+  
+</blockquote>
+
+<h2 id="enpassant">Enpassant<a class="zola-anchor" href="#enpassant" aria-label="Anchor link for: enpassant" style="visibility: hidden;"></a>
+</h2>
+<p>The dreaded enpassant. The good news is, we now have all the tools necessary to
+efficiently query the board information necessary for enpassant. The bad news
+is, enpassant logic and edge cases still suck. Honestly, there's no way other
+than to hard code it.</p>
+<p>One important edge case is that enpassant can cause two pieces to be removed
+off an axis at once:</p>
+<style>
+.container2 {
+  display: grid;
+  grid-template-columns:0.35fr 1fr 0.3fr 1fr 0.35fr;
+  gap: 8px;
+}
+</style>
+<div class="container2">
+<div></div>
+<figure>
+    <img src="ep_edgecase1.png"  alt="en passant edge case">
+    
+    <figcaption>Black&#x27;s enpassant capture...</figcaption>
+    
+</figure>
+
+<div></div>
+<figure>
+    <img src="ep_edgecase2.png"  alt="en passant edge case">
+    
+    <figcaption>...leaves its king exposed</figcaption>
+    
+</figure>
+
+<div></div>
+</div>
+<p>Our pinmasks do not account for this (2 blockers = no pin detected). Instead,
+to prevent this edge case, we can remove both pawns from the occupancy, then
+see if there is an unblocked ray from a rook/queen to the king.</p>
+<p>One other consideration that must be made for enpassant is when making a move,
+the captured piece is on a square different from the one moved to. Enpassant is
+the only type of move that does this, so the <code>make_move()</code> function must
+uniquely account for this.</p>
+<p>In terms of performance, enpassant handling is very fast---double pushes are
+rare, and double pushes with an opponent pawn adjacent to it are even rarer.
+This means we can early-return and avoid enpassant logic in most search paths.</p>
+<h1 id="final-notes">Final Notes<a class="zola-anchor" href="#final-notes" aria-label="Anchor link for: final-notes" style="visibility: hidden;"></a>
+</h1>
+<p>By encoding chess logic with bit manipulation, we can elegantly avoid all
+unnecessary branches and use the fewest instructions possible to generate
+moves. Adding a sprinkle of template programming and some efficient
+<code>make_move()</code> implementation and we have a recipe to compete with the fastest
+move generators on the planet.</p>
+<p>There's some stuff I left out, such as actually making a move by manipulating
+the board state, but I believe the interesting part and bottle-neck is typically
+move generation, not move making. However, its worth noting that the ideas of
+bit manipulation are applicable to move making.</p>
+<p>In the next post, I will discuss optimizing bitboard-based move generation with
+a focus on Rust.</p>
+
+      </article>
+
+      
+      
+
+      
+      
+      <div class="giscus"></div>
+      <script src="https://giscus.app/client.js"
+        data-repo="mxple/mxple.github.io"
+        data-repo-id="R_kgDOHoRoow"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOHoRoo84CopfF"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="http://mxple.wtf/giscus_light.css"
+        data-lang="en"
+        data-loading="lazy"
+        crossorigin="anonymous"
+        async>
+</script>
+
+      
+    </div>
+
+    
+
+
+<footer>
+  <div class="left">
+    <div class="copyright">
+      copyleft 🄯 use everywhere
+      
+      <span>|</span>
+      <!-- Built with <a href="https://www.getzola.org" rel="noreferrer" target="_blank">zola</a> and <a href="https://github.com/isunjn/serene" rel="noreferrer" target="_blank">serene</a> -->
+        made with ♡ by mxple
+      
+    </div>
+  </div>
+
+  <div class="right">
+    
+    
+      
+    
+    
+    <a id="rss-btn" href="https://mxple.wtf/blog/feed.xml">RSS</a>
+    
+    
+
+    
+    
+    
+    <button id="theme-toggle" aria-label="theme switch">
+      <span class="moon-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z" fill="currentColor"></path></svg>
+</span>
+      <span class="sun-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z" fill="currentColor"></path></svg>
+</span>
+    </button>
+    
+  </div>
+</footer>
+
+
+
+
+<dialog id="rss-mask">
+  <div>
+    <a href="https:&#x2F;&#x2F;mxple.wtf&#x2F;blog&#x2F;feed.xml">https:&#x2F;&#x2F;mxple.wtf&#x2F;blog&#x2F;feed.xml</a>
+    
+    
+    <button autofocus aria-label="copy" data-link="https:&#x2F;&#x2F;mxple.wtf&#x2F;blog&#x2F;feed.xml" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z" fill="currentColor"></path></svg>
+
+    </button>
+  </div>
+</dialog>
+
+
+
+  </main>
+</div>
+
+  
+<script src="/js/lightense.min.js"></script>
+
+
+  <script src="https://mxple.wtf/js/main.js"></script>
+</body>
+
+</html>

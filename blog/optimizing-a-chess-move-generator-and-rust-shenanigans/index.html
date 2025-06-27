@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  
+  
+    
+  
+  <meta name="description" content="chess move generation and rust">
+
+  <title>Optimizing a Chess Move Generator and Rust Shenanigans</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="https://mxple.wtf/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://mxple.wtf/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://mxple.wtf/img/apple-touch-icon.png">
+  
+  <style>
+
+  /* light mode colors */
+  /* body { */
+  /*   --primary-color: #5871a2; */
+  /*   --primary-pale-color: #5871a233; */
+  /*   --primary-decoration-color: #5871a210; */
+  /*   --bg-color: #ffffff; */
+  /*   --text-color: #2f3030; */
+  /*   --text-pale-color: #767676; */
+  /*   --text-decoration-color: #a9a9a9; */
+  /*   --highlight-mark-color: #5f75b020; */
+  /**/
+  /*   --callout-note-color: #5871a2; */
+  /*   --callout-tip-color: #268556; */
+  /*   --callout-important-color: #885fc9; */
+  /*   --callout-warning-color: #ab6632; */
+  /*   --callout-caution-color: #c64e4e; */
+  /* } */
+
+  /* dark mode colors */
+  /* body.dark { */
+  /*   --primary-color: #6f8fd1; */
+  /*   --primary-pale-color: #6f8fd166; */
+  /*   --primary-decoration-color: #6f8fd112; */
+  /*   --bg-color: #1c1c1c; */
+  /*   --text-color: #c1c1c1; */
+  /*   --text-pale-color: #848484; */
+  /*   --text-decoration-color: #5f5f5f; */
+  /*   --highlight-mark-color: #8296cb3b; */
+  /**/
+  /*   --callout-note-color: #6f8fd1; */
+  /*   --callout-tip-color: #47976f; */
+  /*   --callout-important-color: #9776cd; */
+  /*   --callout-warning-color: #ad7a52; */
+  /*   --callout-caution-color: #d06161; */
+  /* } */
+  body {
+    --primary-color: #7287fd;
+    --primary-pale-color: #7287fd33;
+    --primary-decoration-color: #7287fd10;
+    --bg-color: #eff1f5;
+    --text-color: #4c4f69;
+    --text-pale-color: #6c6f85;
+    --text-decoration-color: #acb0be;
+    --highlight-mark-color: #7287fd20;
+
+    --callout-note-color: #7287fd;
+    --callout-tip-color: #179299;
+    --callout-important-color: #8839ef;
+    --callout-warning-color: #dc8a78;
+    --callout-caution-color: #e64553;
+  }
+  body.dark {
+    --primary-color: #b7bdf8;
+    --primary-pale-color: #b7bdf833;
+    --primary-decoration-color: #b7bdf810;
+    --bg-color: #24273a;
+    --text-color: #cad3f5;
+    --text-pale-color: #a5adcb;
+    --text-decoration-color: #6e738d;
+    --highlight-mark-color: #b7bdf83b;
+
+    --callout-note-color: #b7bdf8;
+    --callout-tip-color: #8bd5ca;
+    --callout-important-color: #c6a0f6;
+    --callout-warning-color: #f5a97f;
+    --callout-caution-color: #ed8796;
+  }
+
+
+  /* typography */
+  body {
+    --main-font: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --code-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --homepage-max-width: 768px;
+    --main-max-width: 768px;
+    --avatar-size: 56px;
+    --font-size: 16px;
+    --line-height: 1.75;
+    --img-border-radius: 0px;
+    --detail-border-radius: 0px;
+    --dark-mode-img-brightness: 0.75;
+    --dark-mode-chart-brightness: 0.75;
+    --inline-code-border-radius: 1px;
+    --inline-code-bg-color: var(--primary-decoration-color);
+    --block-code-border-radius: 0px;
+    --block-code-border-color: var(--primary-color);
+    --detail-border-color: var(--primary-color);
+  }
+
+</style>
+
+  <link rel="stylesheet" href="https://mxple.wtf/main.css">
+  
+
+<link id="hl" rel="stylesheet" type="text/css" href="/hl-light.css" />
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" integrity="sha384-nB0miv6/jRmo5UMMR1wu3Gz6NLsoTkbqJghGIsx//Rlm+ZU03BU6SQNC66uf4l5+" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" integrity="sha384-7zkQWkzuo3B5mTepMUcHkMB5jZaolc2xDwL6VFqjFALcbeS9Ggm/Yr2r3Dy4lfFg" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" integrity="sha384-43gviWU0YVjaDtb/GhzOouOXtZMP/7XUzwPTstBeZFe/+rCMvRwr4yROQP43s0Xk" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/copy-tex.min.js" integrity="sha384-HORx6nWi8j5/mYA+y57/9/CZc5z8HnEw4WUZWy5yOn9ToKBv1l58vJaufFAn9Zzi" crossorigin="anonymous"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        renderMathInElement(document.body, {
+            delimiters: [
+                { left: '$$', right: '$$', display: true },
+                { left: '$', right: '$', display: false },
+                { left: '\\(', right: '\\)', display: false },
+                { left: '\\[', right: '\\]', display: true }
+            ],
+            throwOnError: false
+        });
+    });
+</script>
+
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="75d8f5b5-c3fa-4a2f-a512-35dd1f205b09"></script>
+
+</head>
+
+<body class="post">
+  
+  <script>
+    const theme = sessionStorage.getItem('theme');
+    const match = window.matchMedia("(prefers-color-scheme: dark)").matches
+    if ((theme && theme == 'dark') || (!theme && match)) {
+      document.body.classList.add('dark');
+      const hl = document.querySelector('link#hl');
+      if (hl) hl.href = 'https://mxple.wtf/hl-dark.css';
+    }
+  </script>
+  
+  
+<div id="wrapper">
+  <div id="blank"></div>
+  <aside>
+    
+    
+    <nav>
+      <ul>
+        
+        <li>
+          <a class="h2" href="#motivation">Motivation</a>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#methodology">Methodology</a>
+          
+          <ul>
+            
+            <li>
+              <a class="h3" href="#heapless-movegen">Heapless Movegen</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#precomputing-shared-values">Precomputing Shared Values</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#unchecked-unsafe-rust">Unchecked Unsafe Rust</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#pop-rightmost">Pop Rightmost</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#inline-assembly">Inline Assembly</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#optimized-return">Optimized Return</a>
+            </li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#further-optimizations">Further Optimizations</a>
+          
+          <ul>
+            
+            <li>
+              <a class="h3" href="#hashing">Hashing</a>
+            </li>
+            
+            <li>
+              <a class="h3" href="#templated-make-move">Templated Make Move</a>
+            </li>
+            
+          </ul>
+          
+        </li>
+        
+        <li>
+          <a class="h2" href="#reflections-as-a-whole">Reflections as a Whole</a>
+          
+        </li>
+        
+      </ul>
+    </nav>
+    
+    
+    <button id="back-to-top" aria-label="back to top">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-up"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+
+    </button>
+    
+  </aside>
+  <main>
+    
+<header>
+  <nav>
+    <a href="https:&#x2F;&#x2F;mxple.wtf&#x2F;blog">← Back</a>
+  </nav>
+</header>
+
+
+    <div>
+      
+      
+      
+      
+      <div id="copy-cfg" style="display: none;" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+"></div>
+      
+      <article class="prose">
+        <h1>Optimizing a Chess Move Generator and Rust Shenanigans</h1>
+        <div id="post-info">
+          <div id="date">
+            <span id="publish">Jun 26, 2025</span>
+            <br>
+            <span class="reading-time"><em>12 minute read</em></span>
+          </div>
+
+          
+        </div>
+
+        
+        
+
+        
+
+        <p><em>This post is part of my series on making Shiro, a chess engine written in Rust.</em></p>
+<p>Some time ago, I reached the first milestone of my chess engine project---legal
+move generation validated by an extensive
+<a rel="nofollow noreferrer" href="https://www.chessprogramming.org/Perft">perft</a> suite. (Perft refers to a test
+querying how many legal moves exist after X moves from a given position) The
+suite tested correct enumeration of 5 billion nodes (chess positions) and ran
+in 20 seconds.</p>
+<p>I had mixed feelings about the 250 million nodes per second (nps) move
+generation. On one hand, it's objectively an impressive number. On the other,
+it fell way short of my
+reference---<a rel="nofollow noreferrer" href="https://github.com/Gigantua/Gigantua">Gigantua's</a>---1.6 billion
+(tested on Ryzen 9900X) nps.</p>
+<p>Dissatisfied with my move generator's speed, I set out to optimize my move
+generator with the goal of at least doubling its performance. After dozens of
+hours of tedious micro optimizations and a questionable amount of unsafe Rust,
+I achieved 700 million nps move gen.</p>
+
+<blockquote class="callout note has-title">
+  
+  
+  <p class="title">
+    <span class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path></svg>
+
+    </span>
+    <strong>What is counted as move generation?</strong>
+  </p>
+  <div class="content">
+    <p>There is a significant difference between counting up moves and actually
+generating moves. If we only cared about a single perft number, we could skip
+exploring the last depth of the move search and just count how many moves are
+in the move list, speeding up generation by orders of magnitude. This is called
+<strong>bulk counting</strong>, and is what the numbers refer to in this article.</p>
+
+  </div>
+  
+</blockquote>
+
+<p>This post documents the techniques used and optimizations made and some
+interesting details I've found about Rust. Enjoy~</p>
+<h1 id="motivation">Motivation<a class="zola-anchor" href="#motivation" aria-label="Anchor link for: motivation" style="visibility: hidden;"></a>
+</h1>
+<p>Move generation is almost never a bottleneck in chess engines; in fact,
+generating <em>legal</em> moves is actually <a rel="nofollow noreferrer" href="https://talkchess.com/viewtopic.php?p=881184#p881184">suboptimal for standard alpha-beta
+engines</a>. That said,
+optimizing Shiro's movegen was not so much for engine performance as for
+testing whether Rust---and I---could stand on the same podium as engines like
+Gigantua.</p>
+<h1 id="methodology">Methodology<a class="zola-anchor" href="#methodology" aria-label="Anchor link for: methodology" style="visibility: hidden;"></a>
+</h1>
+<p>To optimize the throughput of any program, it helps to know where that program
+is spending its time. Tools called profilers are made exactly for this purpose.
+I mainly used <a rel="nofollow noreferrer" href="https://en.wikipedia.org/wiki/Perf_(Linux)"><code>perf</code></a>, a sampling
+profiler for Linux. <code>perf</code> basically works by asking the kernel a few thousand
+times a second about our program's running statistics. It accumulates these
+stats and can figure out which functions our program spent the most time in,
+how many cache misses and branch mispredictions there were, and a bunch of
+other useful stats.</p>
+<p>Unfortunately, <code>perf</code> on its own is a bit unwieldy. Luckily (and this is
+probably my favorite thing about Rust), the Rust ecosystem has amazing tooling,
+including a tool called <a rel="nofollow noreferrer" href="https://github.com/brendangregg/FlameGraph"><code>cargo flamegraph</code></a> which takes the
+monstrous (seriously, its can be hundreds of megabytes) output of <code>perf</code> and
+puts it into an interactive and intuitive view.</p>
+<figure>
+    <embed class="flamegraph" src="flamegraph_1.svg"  alt="Flamegraph 1">
+    <!-- <iframe src="flamegraph_1.svg"  alt="Flamegraph 1"> -->
+    
+    <figcaption>
+Flamegraphs show where a program spends its time. The vertical axis
+represents the depth of the stack trace, and the width of a segment is how
+long the cpu spends executing code in that function. Try clicking around!
+</figcaption>
+    
+</figure>
+<p>Looking at the graph, it's immediately clear that a significant amount of time
+is spent on <code>alloc</code> related functions. This comes as no surprise---heap
+indirection, alloc and free, and especially vector growth are relatively
+expensive.</p>
+<p>Fortunately, we can very easily swap out the old <code>Vec&lt;Move&gt;</code> with static-sized
+arrays, removing pretty much all heap usage from our program. This will be our
+first optimization.</p>
+<p>But before applying that change, as a benchmark, this is the <code>perf stat</code> of the
+unoptimized move gen:</p>
+<pre class="z-code"><code><span class="z-text z-plain">Performance counter stats for &#39;target/release/game&#39;:
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">         19,423.29 msec task-clock:u                     #    1.000 CPUs utilized             
+</span><span class="z-text z-plain">   492,861,228,726      instructions:u                   #    4.63  insn per cycle            
+</span><span class="z-text z-plain">                                                  #    0.02  stalled cycles per insn   
+</span><span class="z-text z-plain">   106,526,240,345      cycles:u                         #    5.484 GHz                       
+</span><span class="z-text z-plain">    11,899,588,129      stalled-cycles-frontend:u        #   11.17% frontend cycles idle      
+</span><span class="z-text z-plain">    79,585,107,489      branches:u                       #    4.097 G/sec                     
+</span><span class="z-text z-plain">       346,631,542      branch-misses:u                  #    0.44% of all branches           
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">      19.428567337 seconds time elapsed
+</span><span class="z-text z-plain">
+</span></code></pre>
+<p>Just over 250 mnps.</p>
+<h2 id="heapless-movegen">Heapless Movegen<a class="zola-anchor" href="#heapless-movegen" aria-label="Anchor link for: heapless-movegen" style="visibility: hidden;"></a>
+</h2>
+<p>We can use the fact that no position can ever have more than <a rel="nofollow noreferrer" href="https://www.chess.com/forum/view/fun-with-chess/what-chess-position-has-the-most-number-of-possible-moves?page=2">218
+moves</a>.
+Therefore, we will use a 255 (+size makes this nicely aligned to 512 bytes)
+sized static array to replace <code>Vec&lt;Move&gt;</code>.</p>
+<div class="codeblock-with-filename">
+  <div class="filename">src&#x2F;engine&#x2F;perft</div>
+  <pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-documentation z-rust"><span class="z-punctuation z-definition z-comment z-rust">///</span> Stack allocated container for `[Move; 255]`
+</span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-struct z-rust">struct</span> </span><span class="z-meta z-struct z-rust"><span class="z-entity z-name z-struct z-rust">MoveList</span> </span><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-other z-member z-rust">size</span><span class="z-punctuation z-separator z-type z-rust">:</span> <span class="z-storage z-type z-rust">u32</span>,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-other z-member z-rust">list</span><span class="z-punctuation z-separator z-type z-rust">:</span> [Move; 255],
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span><span class="z-source z-rust">
+</span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> movelist <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">MoveList<span class="z-punctuation z-accessor z-rust">::</span></span>new<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-support z-function z-rust">gen_moves</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>game<span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> movelist</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+  
+</div>
+<p>This simple change had a surprising impact, increasing nps to 400 million. Here
+is the <code>perf</code> results after removing heap usage from the program:</p>
+<pre class="z-code"><code><span class="z-text z-plain"> Performance counter stats for &#39;target/release/game&#39;:
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">         12,354.94 msec task-clock:u                     #    1.000 CPUs utilized             
+</span><span class="z-text z-plain">   242,060,456,588      instructions:u                   #    3.53  insn per cycle            
+</span><span class="z-text z-plain">                                                  #    0.02  stalled cycles per insn   
+</span><span class="z-text z-plain">    68,535,493,978      cycles:u                         #    5.547 GHz                       
+</span><span class="z-text z-plain">     5,408,830,538      stalled-cycles-frontend:u        #    7.89% frontend cycles idle      
+</span><span class="z-text z-plain">    27,211,774,270      branches:u                       #    2.203 G/sec                     
+</span><span class="z-text z-plain">       220,828,970      branch-misses:u                  #    0.81% of all branches           
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">      12.359881661 seconds time elapsed
+</span><span class="z-text z-plain">
+</span></code></pre>
+<p>Analyzing the <code>perf</code> results a little more, we see that our total instructions
+executed have been halved---there's a lot more library code responsible for
+heap allocation than I anticipated! Additionally, fewer frontend cycles (~3%)
+are spent idle, or in other words, the cpu spends less time waiting for
+resources like memory.</p>
+<p>The flamegraph without <code>alloc</code> routines looks much better:</p>
+<figure>
+    <embed class="flamegraph" src="flamegraph_2.svg"  alt="Flamegraph 2">
+    <!-- <iframe src="flamegraph_2.svg"  alt="Flamegraph 2"> -->
+    
+    <figcaption>
+</figcaption>
+    
+</figure>
+<h2 id="precomputing-shared-values">Precomputing Shared Values<a class="zola-anchor" href="#precomputing-shared-values" aria-label="Anchor link for: precomputing-shared-values" style="visibility: hidden;"></a>
+</h2>
+<p>Currently, many of the values, such as bitboards for a specific piece type or
+lookup bitboards such as <code>unsafe_square_mask</code> are computed multiple times. This
+leads to an obvious optimization of simply pre-computing shared values, and
+storing them for later.</p>
+<p>Our <code>MoveGen</code> handler now contains a few additional fields:</p>
+<pre data-lang="diff" class="language-diff z-code"><code class="language-diff" data-lang="diff"><span class="z-source z-diff">pub struct MoveGen&lt;&#39;a, const IS_WHITE: bool&gt; {
+</span><span class="z-source z-diff">    us: Bitboard,
+</span><span class="z-source z-diff">    op: Bitboard,
+</span><span class="z-source z-diff">
+</span><span class="z-source z-diff"><span class="z-markup z-inserted z-diff"><span class="z-punctuation z-definition z-inserted z-diff">+</span>   us_king: Bitboard,
+</span></span><span class="z-source z-diff"><span class="z-markup z-inserted z-diff"><span class="z-punctuation z-definition z-inserted z-diff">+</span>   us_pawns: Bitboard,
+</span></span><span class="z-source z-diff"><span class="z-markup z-inserted z-diff"><span class="z-punctuation z-definition z-inserted z-diff">+</span>   us_knights: Bitboard,
+</span></span><span class="z-source z-diff"><span class="z-markup z-inserted z-diff"><span class="z-punctuation z-definition z-inserted z-diff">+</span>   us_sliders_hv: Bitboard,
+</span></span><span class="z-source z-diff"><span class="z-markup z-inserted z-diff"><span class="z-punctuation z-definition z-inserted z-diff">+</span>   us_sliders_dg: Bitboard,
+</span></span><span class="z-source z-diff">
+</span><span class="z-source z-diff"><span class="z-markup z-inserted z-diff"><span class="z-punctuation z-definition z-inserted z-diff">+</span>   op_king: Bitboard,
+</span></span><span class="z-source z-diff"><span class="z-markup z-inserted z-diff"><span class="z-punctuation z-definition z-inserted z-diff">+</span>   op_pawns: Bitboard,
+</span></span><span class="z-source z-diff"><span class="z-markup z-inserted z-diff"><span class="z-punctuation z-definition z-inserted z-diff">+</span>   op_knights: Bitboard,
+</span></span><span class="z-source z-diff"><span class="z-markup z-inserted z-diff"><span class="z-punctuation z-definition z-inserted z-diff">+</span>   op_sliders_hz: Bitboard,
+</span></span><span class="z-source z-diff"><span class="z-markup z-inserted z-diff"><span class="z-punctuation z-definition z-inserted z-diff">+</span>   op_sliders_dg: Bitboard,
+</span></span><span class="z-source z-diff">
+</span><span class="z-source z-diff">    checkmask: Bitboard,
+</span><span class="z-source z-diff">    pinmask_hv: Bitboard,
+</span><span class="z-source z-diff">    pinmask_dg: Bitboard,
+</span><span class="z-source z-diff">    seen_by_enemy: Bitboard,
+</span><span class="z-source z-diff">    not_pinned: Bitboard,
+</span><span class="z-source z-diff">
+</span><span class="z-source z-diff">    empty: Bitboard,
+</span><span class="z-source z-diff">    occupied: Bitboard,
+</span><span class="z-source z-diff">    movelist: &amp;&#39;a mut MoveList,
+</span><span class="z-source z-diff">
+</span><span class="z-source z-diff">    ep_sqr: u8,
+</span><span class="z-source z-diff">    checks: u8,
+</span><span class="z-source z-diff">
+</span><span class="z-source z-diff">    flags: Flags,
+</span><span class="z-source z-diff">}
+</span></code></pre>
+<p>And the <code>perf</code> stats.</p>
+<pre class="z-code"><code><span class="z-text z-plain"> Performance counter stats for &#39;target/release/game&#39;:
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">   225,550,027,475      instructions:u                   #    3.54  insn per cycle
+</span><span class="z-text z-plain">    63,684,115,357      cycles:u                         #    5.539 GHz                       
+</span><span class="z-text z-plain">     4,962,731,287      stalled-cycles-frontend:u        #    7.79% frontend cycles idle      
+</span><span class="z-text z-plain">    30,275,775,309      branches:u                       #    2.633 G/sec                     
+</span><span class="z-text z-plain">       216,672,355      branch-misses:u                  #    0.72% of all branches           
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">      11.499080487 seconds time elapsed
+</span></code></pre>
+<p>4 million more branches, but no additional branch misses, and a time
+improvement that could probably be attributed to jitter. Nice!</p>
+<h2 id="unchecked-unsafe-rust">Unchecked Unsafe Rust<a class="zola-anchor" href="#unchecked-unsafe-rust" aria-label="Anchor link for: unchecked-unsafe-rust" style="visibility: hidden;"></a>
+</h2>
+<p>In Rust, whenever an array is accessed and the index's range is not known at
+compile-time, the compiler will insert a runtime bounds check. The overhead of
+this check is practically zero since the branch predictor will learn that all
+bounds checks are within bounds (if it weren't the program would error).</p>
+<p>In my use case, I was certain that my indicies would always be in bounds;
+especially those used to query the lookup maps. Some might argue introducing
+unsafety in attempts to micro-optimize is "bad practice" or not worth it, but I
+think this case is a good exception as an OOB error indicates something is
+inherently wrong with the move generation logic.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Changing to unsafe indexing
+</span></span><span class="z-source z-rust"><span class="z-meta z-annotation z-rust"><span class="z-punctuation z-definition z-annotation z-rust">#</span><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-variable z-annotation z-rust">inline</span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust">always</span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>
+</span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">knight_lookup</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">pos</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> Bitboard</span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">unsafe</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> <span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-other z-rust">KNIGHT_LOOKUP</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">get_unchecked</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pos</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span><span class="z-source z-rust"><span class="z-meta z-annotation z-rust"><span class="z-punctuation z-definition z-annotation z-rust">#</span><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-variable z-annotation z-rust">inline</span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust">always</span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>
+</span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">king_lookup</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">pos</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> Bitboard</span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">unsafe</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> <span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-other z-rust">KING_LOOKUP</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">get_unchecked</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pos</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span><span class="z-source z-rust"><span class="z-meta z-annotation z-rust"><span class="z-punctuation z-definition z-annotation z-rust">#</span><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-variable z-annotation z-rust">inline</span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust">always</span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>
+</span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">check_lookup</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">king_pos</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span>, <span class="z-variable z-parameter z-rust">other_pos</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> Bitboard</span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">unsafe</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> <span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-other z-rust">CHECK_LOOKUP</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">get_unchecked</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>king_pos</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">get_unchecked</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>other_pos</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> a couple more...
+</span></span></code></pre>
+<p>In addition, I made pushes to the move list unchecked as well.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-annotation z-rust"><span class="z-punctuation z-definition z-annotation z-rust">#</span><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-variable z-annotation z-rust">inline</span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust">always</span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>
+</span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">add_move</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-keyword z-operator z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> <span class="z-variable z-parameter z-rust">self</span>, <span class="z-variable z-parameter z-rust">v</span><span class="z-punctuation z-separator z-rust">:</span> Variant, <span class="z-variable z-parameter z-rust">start</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u8</span>, <span class="z-variable z-parameter z-rust">target</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u8</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-modifier z-rust">unsafe</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>movelist<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">push_unchecked</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">            <span class="z-meta z-path z-rust">Move<span class="z-punctuation z-accessor z-rust">::</span></span>new<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">with_variant</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>v</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">with_start</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>start</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">with_target</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>target</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">        </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>Let's look at the <code>perf</code> and flamegraph to see where we're at now.</p>
+<pre class="z-code"><code><span class="z-text z-plain"> Performance counter stats for &#39;target/release/game&#39;:
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">         10,547.95 msec task-clock:u                     #    1.000 CPUs utilized             
+</span><span class="z-text z-plain">   207,850,450,905      instructions:u                   #    3.57  insn per cycle            
+</span><span class="z-text z-plain">                                                  #    0.02  stalled cycles per insn   
+</span><span class="z-text z-plain">    58,230,003,783      cycles:u                         #    5.521 GHz                       
+</span><span class="z-text z-plain">     4,664,269,369      stalled-cycles-frontend:u        #    8.01% frontend cycles idle      
+</span><span class="z-text z-plain">    23,572,488,287      branches:u                       #    2.235 G/sec                     
+</span><span class="z-text z-plain">       213,444,703      branch-misses:u                  #    0.91% of all branches           
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">      10.550542110 seconds time elapsed
+</span></code></pre>
+<figure>
+    <embed class="flamegraph" src="flamegraph_4.svg"  alt="Flamegraph 4">
+    <!-- <iframe src="flamegraph_4.svg"  alt="Flamegraph 4"> -->
+    
+    <figcaption></figcaption>
+    
+</figure>
+<p>Switching to some unsafe rust saves billions of branches and instructions,
+bringing our execution time down another second.</p>
+<h2 id="pop-rightmost">Pop Rightmost<a class="zola-anchor" href="#pop-rightmost" aria-label="Anchor link for: pop-rightmost" style="visibility: hidden;"></a>
+</h2>
+<p>From the latest flamegraph, we see significant time is spent on
+<code>pop_leftmost()</code>. <code>pop_leftmost()</code> is a subroutine that pops the leftmost (most
+significant) set bit of a  number and returns the number of leading zeroes. It
+is used to loop through the set bits of a bitboard (<code>u64</code>) in order to extract
+moves from a move mask.</p>
+<p>The implementation looks like</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-annotation z-rust"><span class="z-punctuation z-definition z-annotation z-rust">#</span><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-variable z-annotation z-rust">inline</span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust">always</span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>
+</span><span class="z-source z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-rust">const</span> <span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">pop_leftmost</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-keyword z-operator z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> <span class="z-variable z-parameter z-rust">self</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> <span class="z-storage z-type z-rust">usize</span></span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> lz <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-constant z-numeric z-float z-rust">0.</span><span class="z-support z-function z-rust">leading_zeros</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> intrinsic compiled to BSR
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-keyword z-operator z-assignment z-rust">^=</span> <span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-numeric z-integer z-decimal z-rust">1</span> <span class="z-keyword z-operator z-comparison z-rust">&lt;</span><span class="z-keyword z-operator z-comparison z-rust">&lt;</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">63</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-comparison z-rust">&gt;</span><span class="z-keyword z-operator z-comparison z-rust">&gt;</span> lz<span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    lz
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>However, there is a better way to implement a bit loop; namely with
+<code>pop_rightmost()</code>. Popping the least significant bit is faster due to a cpu
+instruction called <code>blsr</code> which is slightly faster than <code>bsr</code> on many micro
+architectures.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-annotation z-rust"><span class="z-punctuation z-definition z-annotation z-rust">#</span><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-variable z-annotation z-rust">inline</span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust">always</span></span><span class="z-meta z-annotation z-parameters z-rust"><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span>
+</span><span class="z-source z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-rust">const</span> <span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">pop_rightmost</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-keyword z-operator z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> <span class="z-variable z-parameter z-rust">self</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> <span class="z-storage z-type z-rust">usize</span></span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> tz <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-constant z-numeric z-float z-rust">0.</span><span class="z-support z-function z-rust">trailing_zeros</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-keyword z-operator z-assignment z-rust">&amp;=</span> <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-constant z-numeric z-integer z-decimal z-rust">0</span> <span class="z-keyword z-operator z-arithmetic z-rust">-</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span><span class="z-punctuation z-terminator z-rust">;</span>   <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> this gets compiled into blsr
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-constant z-numeric z-integer z-decimal z-rust">63</span> <span class="z-keyword z-operator z-arithmetic z-rust">-</span> tz     <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> must subtract from 63 to replicate return value of leading_zeroes
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>The original <code>pop_leftmost()</code> would take 4 instructions and the new
+<code>pop_rightmost()</code> takes just 3. In addition, there's room for improvement down
+to a mere 2 instructions. This might not sound like a large improvement, but
+when there are billions of moves to enumerate, a few billion cycles saved
+becomes a lot.</p>
+<pre class="z-code"><code><span class="z-text z-plain"> Performance counter stats for &#39;target/release/game&#39;:
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">          9,163.40 msec task-clock:u                     #    1.000 CPUs utilized             
+</span><span class="z-text z-plain">   180,988,491,319      instructions:u                   #    3.60  insn per cycle            
+</span><span class="z-text z-plain">                                                  #    0.03  stalled cycles per insn   
+</span><span class="z-text z-plain">    50,320,036,864      cycles:u                         #    5.491 GHz                       
+</span><span class="z-text z-plain">     4,956,756,140      stalled-cycles-frontend:u        #    9.85% frontend cycles idle      
+</span><span class="z-text z-plain">    25,097,073,517      branches:u                       #    2.739 G/sec                     
+</span><span class="z-text z-plain">       219,628,599      branch-misses:u                  #    0.88% of all branches           
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">       9.164524983 seconds time elapsed
+</span></code></pre>
+<figure>
+    <embed class="flamegraph" src="flamegraph_5.svg"  alt="Flamegraph 5">
+    <!-- <iframe src="flamegraph_5.svg"  alt="Flamegraph 5"> -->
+    
+    <figcaption></figcaption>
+    
+</figure>
+<p>This brings us under 10 seconds, meaning we have surpassed the milestone of
+doubling performance, but there's still more optimizations to be discovered!</p>
+<h2 id="inline-assembly">Inline Assembly<a class="zola-anchor" href="#inline-assembly" aria-label="Anchor link for: inline-assembly" style="visibility: hidden;"></a>
+</h2>
+<p>Looking closely at the flamegraphs, we see that there's a slice of time spent
+on <code>core::core_arch::x86_64::bmi2::_pext_u64</code>. It's not significant, but its
+weird that its there since I'm using intrinsics:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">pext_hv_lookup</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">occupied</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>, <span class="z-variable z-parameter z-rust">pos</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> <span class="z-storage z-type z-rust">u64</span></span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">  <span class="z-storage z-modifier z-rust">unsafe</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span> 
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-other z-rust">PEXT_HV_LOOKUP</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">get_unchecked</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pos</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">get_unchecked</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">           <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> intrinsic used here
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">            <span class="z-support z-function z-rust">_pext_u64</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>occupied<span class="z-punctuation z-separator z-rust">,</span> <span class="z-constant z-other z-rust">HV_PEXT_MASK_LOOKUP</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span>pos<span class="z-punctuation z-section z-group z-end z-rust">]</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">usize</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">        </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> 
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">  </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>Investigating the assembly, we see something odd:</p>
+<pre data-lang="asm" class="language-asm z-code"><code class="language-asm" data-lang="asm"><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x5555557fcd38</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">lea</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rax</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">[</span><span class="z-variable z-parameter z-register z-assembly">rip</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">-</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-constant z-character z-hexadecimal z-assembly">0x29fbbf</span><span class="z-source z-assembly">]</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x5555557fcd3f</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">add</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">r14</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rax</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x5555557fcd42</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">mov</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rdi</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">qword</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">ptr</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">[</span><span class="z-variable z-parameter z-register z-assembly">rsp</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">+</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-constant z-character z-decimal z-assembly">8</span><span class="z-source z-assembly">]</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x5555557fcd47</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">call</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">c</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">:</span><span class="z-entity z-name z-function z-assembly">:</span><span class="z-entity z-name z-function z-assembly">c</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">_</span><span class="z-entity z-name z-function z-assembly">a</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">c</span><span class="z-entity z-name z-function z-assembly">h</span><span class="z-entity z-name z-function z-assembly">:</span><span class="z-entity z-name z-function z-assembly">:</span><span class="z-entity z-name z-function z-assembly">x</span><span class="z-entity z-name z-function z-assembly">8</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-entity z-name z-function z-assembly">_</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-entity z-name z-function z-assembly">4</span><span class="z-entity z-name z-function z-assembly">:</span><span class="z-entity z-name z-function z-assembly">:</span><span class="z-entity z-name z-function z-assembly">b</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">i</span><span class="z-entity z-name z-function z-assembly">2</span><span class="z-entity z-name z-function z-assembly">:</span><span class="z-entity z-name z-function z-assembly">:</span><span class="z-entity z-name z-function z-assembly">_</span><span class="z-entity z-name z-function z-assembly">p</span><span class="z-entity z-name z-function z-assembly">e</span><span class="z-entity z-name z-function z-assembly">x</span><span class="z-entity z-name z-function z-assembly">t</span><span class="z-entity z-name z-function z-assembly">_</span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-entity z-name z-function z-assembly">4</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">↓</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x5555557f3fa0</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">pext</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rax</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rdi</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rsi</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x5555557f3fa5</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">ret</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">↓</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x5555557fcd4c</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">mov</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rax</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">qword</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">ptr</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">[</span><span class="z-variable z-parameter z-register z-assembly">r14</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">+</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rax</span><span class="z-source z-assembly">*</span><span class="z-constant z-character z-decimal z-assembly">8</span><span class="z-source z-assembly">]</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x5555557fcd50</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">and</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rax</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">r13</span>
+</span><span class="z-source z-assembly"><span class="z-entity z-name z-function z-assembly">.</span><span class="z-entity z-name z-function z-assembly">.</span><span class="z-entity z-name z-function z-assembly">.</span>
+</span></code></pre>
+<p><code>_pext_u64</code> isn't inlined! As a result, we have 2 more instructions than
+necessary, and our code is jumping around for no reason. The fact that <code>rustc</code>
+didn't inline this simple function was very confusing, and all methods of
+trying to get it to inline failed. I even dug through LLVM documentation and
+tried combing through <code>rustc</code> passes to figure out why the inline didn't occur.
+Eventually, I gave up used inline assembly instead; which I probably should
+have done much earlier consider how nice Rust's support for inline assembly is.</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">pext_hv_lookup</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">occupied</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u64</span>, <span class="z-variable z-parameter z-rust">pos</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">usize</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> <span class="z-meta z-function z-return-type z-rust"><span class="z-punctuation z-separator z-rust">-&gt;</span> <span class="z-storage z-type z-rust">u64</span></span> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">  <span class="z-storage z-modifier z-rust">unsafe</span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> result<span class="z-punctuation z-separator z-rust">:</span> <span class="z-storage z-type z-rust">u64</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    <span class="z-support z-macro z-rust">asm!</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">        <span class="z-string z-quoted z-double z-rust"><span class="z-punctuation z-definition z-string z-begin z-rust">&quot;</span>pext {result}, {occupied}, {pos}<span class="z-punctuation z-definition z-string z-end z-rust">&quot;</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">        occupied <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-keyword z-operator z-rust">in</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>reg</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> occupied<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">        pos <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-keyword z-operator z-rust">in</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>reg</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-constant z-other z-rust">HV_PEXT_MASK_LOOKUP</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">get_unchecked</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pos</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">        result <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-support z-function z-rust">out</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>reg</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> result<span class="z-punctuation z-separator z-rust">,</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-group z-rust">    </span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-operator z-arithmetic z-rust">*</span><span class="z-constant z-other z-rust">PEXT_HV_LOOKUP</span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">get_unchecked</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pos</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">get_unchecked</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>result <span class="z-keyword z-operator z-rust">as</span> <span class="z-storage z-type z-rust">usize</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> 
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">  </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>After this change, I disassembled the program again and <code>pext</code> was nicely
+inlined. The speedup wasn't much (3 billion instructions saved and 0.3 seconds
+of time), but this particular change wasn't about the optimization so much as
+my building frustration at Rustc for not inlining <code>_pext_u64</code>.</p>
+<pre class="z-code"><code><span class="z-text z-plain"> Performance counter stats for &#39;target/release/game&#39;:
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">          8,758.45 msec task-clock:u                     #    1.000 CPUs utilized             
+</span><span class="z-text z-plain">   177,933,940,135      instructions:u                   #    3.70  insn per cycle            
+</span><span class="z-text z-plain">                                                  #    0.02  stalled cycles per insn   
+</span><span class="z-text z-plain">    48,053,645,660      cycles:u                         #    5.487 GHz                       
+</span><span class="z-text z-plain">     4,402,567,620      stalled-cycles-frontend:u        #    9.16% frontend cycles idle      
+</span><span class="z-text z-plain">    23,418,366,132      branches:u                       #    2.674 G/sec                     
+</span><span class="z-text z-plain">       210,124,185      branch-misses:u                  #    0.90% of all branches           
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">       8.762713925 seconds time elapsed
+</span></code></pre>
+<figure>
+    <embed class="flamegraph" src="flamegraph_6.svg"  alt="Flamegraph 6">
+    <!-- <iframe src="flamegraph_6.svg"  alt="Flamegraph 6"> -->
+    
+    <figcaption>No more pext function!</figcaption>
+    
+</figure>
+
+<blockquote class="callout note has-title">
+  
+  
+  <p class="title">
+    <span class="icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12C22 17.5228 17.5228 22 12 22ZM12 20C16.4183 20 20 16.4183 20 12C20 7.58172 16.4183 4 12 4C7.58172 4 4 7.58172 4 12C4 16.4183 7.58172 20 12 20ZM11 7H13V9H11V7ZM11 11H13V17H11V11Z" fill="currentColor"></path></svg>
+
+    </span>
+    <strong>Why wasn&#x27;t pext inlined?</strong>
+  </p>
+  <div class="content">
+    <p>I submitted an issue to Rustc trying to find out why <code>pext</code> wasn't being
+inlined. Some time later, I got my reply. It turns out, <code>pext</code> being part of the
+<code>bmi2</code> extension set, requires a <code>bmi2</code> feature annotation on any function that
+calls it---even if the entire program is compiled with the <code>bmi2</code>
+microarchitecture. This allows a software fallback to be used, alongside
+runtime detection of the ISA.</p>
+
+  </div>
+  
+</blockquote>
+
+<h2 id="optimized-return">Optimized Return<a class="zola-anchor" href="#optimized-return" aria-label="Anchor link for: optimized-return" style="visibility: hidden;"></a>
+</h2>
+<p>You may have noticed the large block of time spent in <code>libc.so.6</code>. I never used
+any complex std functions in <code>make_move()</code> so I was confused why the time was
+being spent there. Pulling out a debugger and setting a breakpoint in
+<code>make_move()</code> reveals some <code>AVX</code> instructions around the return statement of
+<code>make_move()</code>.</p>
+<pre data-lang="asm" class="language-asm z-code"><code class="language-asm" data-lang="asm"><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efaf84</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">mov</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rax</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rdi</span><span class="z-entity z-name z-function z-assembly"> </span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efaf87</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">cmp</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rdx</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-constant z-character z-hexadecimal z-assembly">0x40</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efaf8b</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">jb</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efafd0</span><span class="z-entity z-name z-function z-assembly"> </span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efaf8d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">v</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">v</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">q</span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-entity z-name z-function z-assembly">4</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">z</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">z</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">ptr</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">[</span><span class="z-variable z-parameter z-register z-assembly">rsi</span><span class="z-source z-assembly">]</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efaf93</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">cmp</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rdx</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-constant z-character z-hexadecimal z-assembly">0x80</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efaf9a</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">ja</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efb080</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efafa0</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">v</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">v</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">q</span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-entity z-name z-function z-assembly">4</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">z</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">7</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">z</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">ptr</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">[</span><span class="z-variable z-parameter z-register z-assembly">rsi</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">+</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rdx</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">-</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-constant z-character z-hexadecimal z-assembly">0x40</span><span class="z-source z-assembly">]</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efafa8</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">v</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">v</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">q</span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-entity z-name z-function z-assembly">4</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">z</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">ptr</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">[</span><span class="z-variable z-parameter z-register z-assembly">rdi</span><span class="z-source z-assembly">]</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">z</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">6</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efafae</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">v</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">v</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly">q</span><span class="z-entity z-name z-function z-assembly">u</span><span class="z-entity z-name z-function z-assembly">6</span><span class="z-entity z-name z-function z-assembly">4</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">z</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">w</span><span class="z-entity z-name z-function z-assembly">o</span><span class="z-entity z-name z-function z-assembly">r</span><span class="z-entity z-name z-function z-assembly">d</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-support z-function z-directive z-assembly">ptr</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">[</span><span class="z-variable z-parameter z-register z-assembly">rdi</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">+</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-variable z-parameter z-register z-assembly">rdx</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-source z-assembly">-</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-constant z-character z-hexadecimal z-assembly">0x40</span><span class="z-source z-assembly">]</span><span class="z-source z-assembly">,</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly">z</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">m</span><span class="z-entity z-name z-function z-assembly">1</span><span class="z-entity z-name z-function z-assembly">7</span>
+</span><span class="z-source z-assembly"><span class="z-constant z-character z-hexadecimal z-assembly">0x7ffff7efafb6</span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-entity z-name z-function z-assembly"> </span><span class="z-keyword z-control z-assembly">ret</span>
+</span></code></pre>
+<p>These instructions are copying the <code>BoardState</code> in order to return it. This is
+odd since I would expect <code>rustc</code> to have optimized in a copy elision (RVO) and
+avoided the 144 byte copy. Rather than return by value, I refactored
+<code>make_move()</code> to modify a mutable instance of <code>BoardState</code> instead:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> modifies `newgame` and returns nothing
+</span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">make_move</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-variable z-parameter z-rust">game</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-keyword z-operator z-rust">&amp;</span>BoardState, <span class="z-variable z-parameter z-rust">m</span><span class="z-punctuation z-separator z-rust">:</span> Move, <span class="z-variable z-parameter z-rust">newgame</span><span class="z-punctuation z-separator z-rust">:</span> <span class="z-keyword z-operator z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> BoardState</span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span><span class="z-keyword z-operator z-range z-rust">...</span></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span><span class="z-source z-rust">
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> usage
+</span></span><span class="z-source z-rust"><span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> next <span class="z-keyword z-operator z-assignment z-rust">=</span> game<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">clone</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span><span class="z-source z-rust"><span class="z-support z-function z-rust">make_move</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>game<span class="z-punctuation z-separator z-rust">,</span> m<span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> next</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></code></pre>
+<p>Benchmarking the new version, I found a surprising speedup:</p>
+<pre class="z-code"><code><span class="z-text z-plain"> Performance counter stats for &#39;target/release/game&#39;:
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">          7,239.67 msec task-clock:u                     #    1.000 CPUs utilized
+</span><span class="z-text z-plain">   167,822,127,457      instructions:u                   #    4.22  insn per cycle
+</span><span class="z-text z-plain">                                                  #    0.03  stalled cycles per insn
+</span><span class="z-text z-plain">    39,754,720,670      cycles:u                         #    5.491 GHz
+</span><span class="z-text z-plain">     5,010,090,849      stalled-cycles-frontend:u        #   12.60% frontend cycles idle
+</span><span class="z-text z-plain">    21,741,622,228      branches:u                       #    3.003 G/sec
+</span><span class="z-text z-plain">       206,750,434      branch-misses:u                  #    0.95% of all branches
+</span><span class="z-text z-plain">
+</span><span class="z-text z-plain">       7.241345391 seconds time elapsed
+</span></code></pre>
+<figure>
+    <embed class="flamegraph" src="flamegraph_7.svg"  alt="Flamegraph 7">
+    <!-- <iframe src="flamegraph_7.svg"  alt="Flamegraph 7"> -->
+    
+    <figcaption></figcaption>
+    
+</figure>
+<p>This brings us to just under 7 mnps.</p>
+<h1 id="further-optimizations">Further Optimizations<a class="zola-anchor" href="#further-optimizations" aria-label="Anchor link for: further-optimizations" style="visibility: hidden;"></a>
+</h1>
+<p>This about covers it for the key optimizations applied. I have no doubt another
+second could be squeezed out with some considerable effort, but I have spent
+enough time on this chapter as is.</p>
+<p>In addition, the bottleneck is moving away from move generation and to move
+making---something that can't be easily optimized. Move counters like Gigantua
+can afford to do the bare minimum when computing a move, but real chess engines
+have to maintain information not strictly necessary for move generation, like
+maintaining Zobrist hashes and updating half move counters.</p>
+<p>There are three other big optimizations that I have thought of, but due to
+complexity or some other reason, I chose not to implement them. I will however,
+document them here as a reminder to revisit this project.</p>
+<h2 id="hashing">Hashing<a class="zola-anchor" href="#hashing" aria-label="Anchor link for: hashing" style="visibility: hidden;"></a>
+</h2>
+<p>This one is bit cheaty---as in not quite in the spirit of move generation. That
+is to hash each position and memoize the number of legal moves at the position
+so that we can quickly add its move tree to our total whenever we come across
+it.</p>
+<p>The overhead of hashing is not too bad, especially when using <a rel="nofollow noreferrer" href="https://www.chessprogramming.org/Zobrist_Hashing">Zobrist
+boards</a>. However, such a
+technique would never be used in a real engine since there is simply no point.
+Chess engines care about generating actual moves, not counting them up.</p>
+<h2 id="templated-make-move">Templated Make Move<a class="zola-anchor" href="#templated-make-move" aria-label="Anchor link for: templated-make-move" style="visibility: hidden;"></a>
+</h2>
+<p>This technique is one that Gigantua and some other engines use. By using
+monomorphisms (templating on which piece was moved), we can cut a lot of
+branching out of move making.</p>
+<p>However, this carries with it a lot of complexity and blows up the binary size.
+I suspect the gains from it would also be lackluster relative to the work it
+requires.</p>
+<p>Another interesting optimization would be to use a <code>DenseMove</code> struct that looks like</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-storage z-type z-struct z-rust">struct</span> </span><span class="z-meta z-struct z-rust"><span class="z-entity z-name z-struct z-rust">DenseMove</span> </span><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-other z-member z-rust">start</span><span class="z-punctuation z-separator z-type z-rust">:</span> Square,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-other z-member z-rust">piece_moved</span><span class="z-punctuation z-separator z-type z-rust">:</span> PieceType,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-other z-member z-rust">targets</span><span class="z-punctuation z-separator z-type z-rust">:</span> Bitboard,
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-struct z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>This <code>DenseMove</code> can store potentially many moves. The benefit is that all
+branching in move generator can be postponed to move making. This makes the
+code path ever-so slightly more predictable.</p>
+<h1 id="reflections-as-a-whole">Reflections as a Whole<a class="zola-anchor" href="#reflections-as-a-whole" aria-label="Anchor link for: reflections-as-a-whole" style="visibility: hidden;"></a>
+</h1>
+<p>I've spent quite some time away from this project (this post is over 3 months
+in the making). As such, I've had a lot of time to think about this post.
+Looking back, if I were to do a few things differently, it would be making more
+organized commits (with reasonable commit messages) and more rigorous testing.
+Digging for which commit contained which optimization was really hard---many
+optimizations were batched together and some had no effect. Regarding testing,
+I definitely should have fixed my CPU clock rate and done some graphing +
+benchmark suite.</p>
+<p>Finally I want to leave some thoughts on Rust. I'm still new to the language,
+and many parts of this project saw me fighting the language. By writing
+"unrusty" or "idiomatically poor" Rust, I gained something like 3 seconds---a
+huge improvement. This makes it difficult to fully believe in Rust's promise of
+"zero-cost abstractions." No doubt, much of this "language-fighting" and hacky
+low-level stuff would not have been present if I were using C++.</p>
+<p>However, Rust <em>has</em> made organization as a whole much easier. I admit, it's
+module system and strong type system are really growing me. As <em>Shiro</em> grows,
+Rust's strengths become evermore apparent. And at the end of the day, though it
+took much effort and research, I <em>was</em> able to squeeze the performance I needed
+out of Rust---and I learned quite a lot along the way.</p>
+<p>Thanks for making it this far; hopefully, this post was insightful! I'm not
+sure if there will be another part to this series since there isn't anything
+too interesting regarding minimax or board evaluation. But who knows, maybe
+something worth writing about will show up :)</p>
+
+      </article>
+
+      
+      
+
+      
+      
+      <div class="giscus"></div>
+      <script src="https://giscus.app/client.js"
+        data-repo="mxple/mxple.github.io"
+        data-repo-id="R_kgDOHoRoow"
+        data-category="Announcements"
+        data-category-id="DIC_kwDOHoRoo84CopfF"
+        data-mapping="pathname"
+        data-strict="0"
+        data-reactions-enabled="1"
+        data-emit-metadata="0"
+        data-input-position="bottom"
+        data-theme="http://mxple.wtf/giscus_light.css"
+        data-lang="en"
+        data-loading="lazy"
+        crossorigin="anonymous"
+        async>
+</script>
+
+      
+    </div>
+
+    
+
+
+<footer>
+  <div class="left">
+    <div class="copyright">
+      copyleft 🄯 use everywhere
+      
+      <span>|</span>
+      <!-- Built with <a href="https://www.getzola.org" rel="noreferrer" target="_blank">zola</a> and <a href="https://github.com/isunjn/serene" rel="noreferrer" target="_blank">serene</a> -->
+        made with ♡ by mxple
+      
+    </div>
+  </div>
+
+  <div class="right">
+    
+    
+      
+    
+    
+    <a id="rss-btn" href="https://mxple.wtf/blog/feed.xml">RSS</a>
+    
+    
+
+    
+    
+    
+    <button id="theme-toggle" aria-label="theme switch">
+      <span class="moon-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M10 7C10 10.866 13.134 14 17 14C18.9584 14 20.729 13.1957 21.9995 11.8995C22 11.933 22 11.9665 22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C12.0335 2 12.067 2 12.1005 2.00049C10.8043 3.27098 10 5.04157 10 7ZM4 12C4 16.4183 7.58172 20 12 20C15.0583 20 17.7158 18.2839 19.062 15.7621C18.3945 15.9187 17.7035 16 17 16C12.0294 16 8 11.9706 8 7C8 6.29648 8.08133 5.60547 8.2379 4.938C5.71611 6.28423 4 8.9417 4 12Z" fill="currentColor"></path></svg>
+</span>
+      <span class="sun-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M12 18C8.68629 18 6 15.3137 6 12C6 8.68629 8.68629 6 12 6C15.3137 6 18 8.68629 18 12C18 15.3137 15.3137 18 12 18ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16ZM11 1H13V4H11V1ZM11 20H13V23H11V20ZM3.51472 4.92893L4.92893 3.51472L7.05025 5.63604L5.63604 7.05025L3.51472 4.92893ZM16.9497 18.364L18.364 16.9497L20.4853 19.0711L19.0711 20.4853L16.9497 18.364ZM19.0711 3.51472L20.4853 4.92893L18.364 7.05025L16.9497 5.63604L19.0711 3.51472ZM5.63604 16.9497L7.05025 18.364L4.92893 20.4853L3.51472 19.0711L5.63604 16.9497ZM23 11V13H20V11H23ZM4 11V13H1V11H4Z" fill="currentColor"></path></svg>
+</span>
+    </button>
+    
+  </div>
+</footer>
+
+
+
+
+<dialog id="rss-mask">
+  <div>
+    <a href="https:&#x2F;&#x2F;mxple.wtf&#x2F;blog&#x2F;feed.xml">https:&#x2F;&#x2F;mxple.wtf&#x2F;blog&#x2F;feed.xml</a>
+    
+    
+    <button autofocus aria-label="copy" data-link="https:&#x2F;&#x2F;mxple.wtf&#x2F;blog&#x2F;feed.xml" data-copy-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" data-check-icon="&lt;svg xmlns=&quot;http:&#x2F;&#x2F;www.w3.org&#x2F;2000&#x2F;svg&quot; viewBox=&quot;0 0 24 24&quot; width=&quot;18&quot; height=&quot;18&quot;&gt;&lt;path d=&quot;M10.0007 15.1709L19.1931 5.97852L20.6073 7.39273L10.0007 17.9993L3.63672 11.6354L5.05093 10.2212L10.0007 15.1709Z&quot; fill=&quot;currentColor&quot;&gt;&lt;&#x2F;path&gt;&lt;&#x2F;svg&gt;
+" >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18"><path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z" fill="currentColor"></path></svg>
+
+    </button>
+  </div>
+</dialog>
+
+
+
+  </main>
+</div>
+
+  
+<script src="/js/lightense.min.js"></script>
+
+
+  <script src="https://mxple.wtf/js/main.js"></script>
+</body>
+
+</html>

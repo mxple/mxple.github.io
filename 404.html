@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  
+  <title>404</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="https://mxple.wtf/img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://mxple.wtf/img/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://mxple.wtf/img/apple-touch-icon.png">
+  
+  <style>
+
+  /* light mode colors */
+  /* body { */
+  /*   --primary-color: #5871a2; */
+  /*   --primary-pale-color: #5871a233; */
+  /*   --primary-decoration-color: #5871a210; */
+  /*   --bg-color: #ffffff; */
+  /*   --text-color: #2f3030; */
+  /*   --text-pale-color: #767676; */
+  /*   --text-decoration-color: #a9a9a9; */
+  /*   --highlight-mark-color: #5f75b020; */
+  /**/
+  /*   --callout-note-color: #5871a2; */
+  /*   --callout-tip-color: #268556; */
+  /*   --callout-important-color: #885fc9; */
+  /*   --callout-warning-color: #ab6632; */
+  /*   --callout-caution-color: #c64e4e; */
+  /* } */
+
+  /* dark mode colors */
+  /* body.dark { */
+  /*   --primary-color: #6f8fd1; */
+  /*   --primary-pale-color: #6f8fd166; */
+  /*   --primary-decoration-color: #6f8fd112; */
+  /*   --bg-color: #1c1c1c; */
+  /*   --text-color: #c1c1c1; */
+  /*   --text-pale-color: #848484; */
+  /*   --text-decoration-color: #5f5f5f; */
+  /*   --highlight-mark-color: #8296cb3b; */
+  /**/
+  /*   --callout-note-color: #6f8fd1; */
+  /*   --callout-tip-color: #47976f; */
+  /*   --callout-important-color: #9776cd; */
+  /*   --callout-warning-color: #ad7a52; */
+  /*   --callout-caution-color: #d06161; */
+  /* } */
+  body {
+    --primary-color: #7287fd;
+    --primary-pale-color: #7287fd33;
+    --primary-decoration-color: #7287fd10;
+    --bg-color: #eff1f5;
+    --text-color: #4c4f69;
+    --text-pale-color: #6c6f85;
+    --text-decoration-color: #acb0be;
+    --highlight-mark-color: #7287fd20;
+
+    --callout-note-color: #7287fd;
+    --callout-tip-color: #179299;
+    --callout-important-color: #8839ef;
+    --callout-warning-color: #dc8a78;
+    --callout-caution-color: #e64553;
+  }
+  body.dark {
+    --primary-color: #b7bdf8;
+    --primary-pale-color: #b7bdf833;
+    --primary-decoration-color: #b7bdf810;
+    --bg-color: #24273a;
+    --text-color: #cad3f5;
+    --text-pale-color: #a5adcb;
+    --text-decoration-color: #6e738d;
+    --highlight-mark-color: #b7bdf83b;
+
+    --callout-note-color: #b7bdf8;
+    --callout-tip-color: #8bd5ca;
+    --callout-important-color: #c6a0f6;
+    --callout-warning-color: #f5a97f;
+    --callout-caution-color: #ed8796;
+  }
+
+
+  /* typography */
+  body {
+    --main-font: ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    --code-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+    --homepage-max-width: 768px;
+    --main-max-width: 768px;
+    --avatar-size: 56px;
+    --font-size: 16px;
+    --line-height: 1.75;
+    --img-border-radius: 0px;
+    --detail-border-radius: 0px;
+    --dark-mode-img-brightness: 0.75;
+    --dark-mode-chart-brightness: 0.75;
+    --inline-code-border-radius: 1px;
+    --inline-code-bg-color: var(--primary-decoration-color);
+    --block-code-border-radius: 0px;
+    --block-code-border-color: var(--primary-color);
+    --detail-border-color: var(--primary-color);
+  }
+
+</style>
+
+  <link rel="stylesheet" href="https://mxple.wtf/main.css">
+  
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="75d8f5b5-c3fa-4a2f-a512-35dd1f205b09"></script>
+
+</head>
+
+<body class="not-found">
+  
+  <script>
+    const theme = sessionStorage.getItem('theme');
+    const match = window.matchMedia("(prefers-color-scheme: dark)").matches
+    if ((theme && theme == 'dark') || (!theme && match)) {
+      document.body.classList.add('dark');
+      const hl = document.querySelector('link#hl');
+      if (hl) hl.href = 'https://mxple.wtf/hl-dark.css';
+    }
+  </script>
+  
+  
+<div class="wrapper">
+  <p class="error">
+    404 - Did you get lost?
+  </p>
+  <a class="instant" href="https://mxple.wtf">« back to home »</a>
+</div>
+
+  
+  <script src="https://mxple.wtf/js/main.js"></script>
+</body>
+
+</html>

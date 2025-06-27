@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>https://mxple.wtf/</loc>
+    </url>
+    <url>
+        <loc>https://mxple.wtf/blog/</loc>
+    </url>
+    <url>
+        <loc>https://mxple.wtf/blog/first/</loc>
+        <lastmod>2025-03-31</lastmod>
+    </url>
+    <url>
+        <loc>https://mxple.wtf/blog/legal-move-generation-in-chess-using-bit-manipulation/</loc>
+        <lastmod>2025-04-20</lastmod>
+    </url>
+    <url>
+        <loc>https://mxple.wtf/blog/optimizing-a-chess-move-generator-and-rust-shenanigans/</loc>
+        <lastmod>2025-06-26</lastmod>
+    </url>
+    <url>
+        <loc>https://mxple.wtf/categories/</loc>
+    </url>
+    <url>
+        <loc>https://mxple.wtf/tags/</loc>
+    </url>
+</urlset>
